@@ -1,16 +1,16 @@
 <?php
 
-namespace LaravelGeoserver\LaravelGeoserver\Facades;
+namespace BecaGIS\LaravelGeoserver\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @see \LaravelGeoserver\LaravelGeoserver\LaravelGeoserver
  */
-class LaravelGeoserver extends Facade
+class GeoServer extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return \LaravelGeoserver\LaravelGeoserver\LaravelGeoserver::class;
+        return \BecaGIS\LaravelGeoserver\LaravelGeoserver::class;
     }
 }

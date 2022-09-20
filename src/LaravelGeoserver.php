@@ -1,7 +1,8 @@
 <?php
 
-namespace LaravelGeoserver\LaravelGeoserver;
+namespace BecaGIS\LaravelGeoserver;
 
 class LaravelGeoserver
 {
+
 }

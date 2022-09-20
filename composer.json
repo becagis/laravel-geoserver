@@ -30,13 +30,13 @@
     },
     "autoload": {
         "psr-4": {
-            "LaravelGeoserver\\LaravelGeoserver\\": "src",
-            "LaravelGeoserver\\LaravelGeoserver\\Database\\Factories\\": "database/factories"
+            "BecaGIS\\LaravelGeoserver\\": "src",
+            "BecaGIS\\LaravelGeoserver\\Database\\Factories\\": "database/factories"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "LaravelGeoserver\\LaravelGeoserver\\Tests\\": "tests"
+            "BecaGIS\\LaravelGeoserver\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -51,10 +51,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "LaravelGeoserver\\LaravelGeoserver\\LaravelGeoserverServiceProvider"
+                "BecaGIS\\LaravelGeoserver\\LaravelGeoserverServiceProvider"
             ],
             "aliases": {
-                "LaravelGeoserver": "LaravelGeoserver\\LaravelGeoserver\\Facades\\LaravelGeoserver"
+                "LaravelGeoserver": "BecaGIS\\LaravelGeoserver\\Facades\\GeoServer"
             }
         }
     },
