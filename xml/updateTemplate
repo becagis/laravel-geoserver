@@ -1,0 +1,189 @@
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:MultiPolygon srsName="EPSG:4326">
+                    <gml:polygonMember>
+                        <gml:Polygon srsName="EPSG:4326">
+                            <gml:exterior>
+                                <gml:LinearRing>
+                                    <gml:posList>106.69757139 10.860888 106.69764273 10.860730730000004 106.69756826
+                                        10.860741229999995 106.69739878 10.860762569999986 106.69705095
+                                        10.860806359999993 106.69655240000002 10.860864390000001 106.69636887
+                                        10.860885749999996 106.69627239 10.860896979999994 106.69622099000001
+                                        10.860902969999986 106.69614275 10.860911009999983 106.69594116
+                                        10.860931740000005 106.6958986 10.860936119999998 106.69581658
+                                        10.860944559999986 106.69570761000001 10.860955759999987 106.69548355
+                                        10.86097879999998 106.69531523999999 10.860996109999986 106.69521968
+                                        10.86107153999999 106.69518067 10.861189739999983 106.69564352000002
+                                        10.861151359999996 106.69587706999998 10.861131999999996 106.69605267047882
+                                        10.861190937025388 106.69620182 10.861105069999992 106.69633162021637
+                                        10.861158273417564 106.69643032547536 10.8611624880924 106.69651186469491
+                                        10.861204634666622 106.69654619693755 10.86115300509403 106.69681227210458
+                                        10.8611624880924 106.69704255000002 10.861035359999995 106.69740524
+                                        10.861005279999995 106.69752261 10.860995550000002 106.69757139 10.860888
+                                    </gml:posList>
+                                </gml:LinearRing>
+                            </gml:exterior>
+                        </gml:Polygon>
+                    </gml:polygonMember>
+                </gml:MultiPolygon>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>matdo</wfs:Name>
+            <wfs:Value>12</wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>hesosdd</wfs:Name>
+            <wfs:Value>1ss2</wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>dtshape</wfs:Name>
+            <wfs:Value>3333</wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>chieucao</wfs:Name>
+            <wfs:Value>1</wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+</wfs:Transaction>
+
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Update typeName="geonode:qhpksdd_quan12">
+        <wfs:Property>
+            <wfs:Name>the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:MultiPolygon srsName="EPSG:4326">
+                    <gml:polygonMember>
+                        <gml:Polygon srsName="EPSG:4326">
+                            <gml:exterior>
+                                <gml:LinearRing>
+                                    <gml:posList>106.69475942 10.861100879999988 106.69470931 10.861036729999993
+                                        106.69431134 10.861061479999995 106.69427884 10.861063499999993 106.69405642
+                                        10.861077339999992 106.69409573084702 10.860966638085413 106.69383345
+                                        10.861091199999983 106.69336724286221 10.861017214010962 106.69326487
+                                        10.861119060000002 106.69322817000001 10.861120859999989 106.6931481
+                                        10.861124779999997 106.69314705 10.861124829999996 106.69313419
+                                        10.861155780000004 106.69311279000001 10.86120729999998 106.69311272
+                                        10.861207470000005 106.69310055 10.86123075999998 106.69307706
+                                        10.861275690000005 106.69305781 10.861312529999994 106.69305779
+                                        10.861312569999987 106.69303743 10.861344379999984 106.69302184
+                                        10.861368729999995 106.69302346000002 10.861368599999988 106.69319112
+                                        10.861354699999994 106.69322579 10.861351819999982 106.69349223
+                                        10.861329729999982 106.69399201 10.861288299999996 106.6942263
+                                        10.861268869999996 106.69471697 10.861228189999983 106.69473309000001
+                                        10.861179859999993 106.69475942 10.861100879999988</gml:posList>
+                                </gml:LinearRing>
+                            </gml:exterior>
+                        </gml:Polygon>
+                    </gml:polygonMember>
+                </gml:MultiPolygon>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.2" />
+        </ogc:Filter>
+    </wfs:Update>
+</wfs:Transaction>
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Update typeName="geonode:hoga_point9">
+        <wfs:Property>
+            <wfs:Name>the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:Point srsDimension="2" srsName="EPSG:4326">
+                    <gml:pos>106.66242957113538 11.42003373911552</gml:pos>
+                </gml:Point>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="hoga_point9.1" />
+        </ogc:Filter>
+    </wfs:Update>
+</wfs:Transaction>
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Update typeName="geonode:tuyencap_polyline12">
+        <wfs:Property>
+            <wfs:Name>the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:MultiLineString srsName="EPSG:4326">
+                    <gml:lineStringMember>
+                        <gml:LineString srsName="EPSG:4326">
+                            <gml:posList>106.66238216 11.419958090000005 106.66238216 11.419958090000005
+                                106.66238400000002 11.419956609999987 106.66238471 11.419956039999985 106.66243815422057
+                                11.41991871568434 106.66268479 11.419714709999983 106.6626855 11.419714139999993
+                                106.66268735 11.41971265999999</gml:posList>
+                        </gml:LineString>
+                    </gml:lineStringMember>
+                </gml:MultiLineString>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="tuyencap_polyline12.1" />
+        </ogc:Filter>
+    </wfs:Update>
+</wfs:Transaction>
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Update typeName="geonode:vietnam_province">
+        <wfs:Property>
+            <wfs:Name>the_geom</wfs:Name>
+            <wfs:Value>
+                <gml:MultiPolygon srsName="EPSG:4326">
+                    <gml:polygonMember>
+                        <gml:Polygon srsName="EPSG:4326">
+                            <gml:exterior>
+                                <gml:LinearRing>
+                                    <gml:posList>106.42365265 11.495157239999994 106.42867279
+                                        11.496618269999992 106.43419647 11.500681879999997 106.44338989
+                                        11.498540880000004</gml:posList>
+                                </gml:LinearRing>
+                            </gml:exterior>
+                        </gml:Polygon>
+                    </gml:polygonMember>
+                </gml:MultiPolygon>
+            </wfs:Value>
+        </wfs:Property>
+        <ogc:Filter>
+            <ogc:FeatureId fid="vietnam_province.1" />
+        </ogc:Filter>
+    </wfs:Update>
+</wfs:Transaction>

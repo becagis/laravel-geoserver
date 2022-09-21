@@ -1,0 +1,10 @@
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs"
+    xmlns:geonode="http://www.geonode.org/">
+    <wfs:Delete typeName="geonode:qhpksdd_quan12">
+        <ogc:Filter>
+            <ogc:FeatureId fid="qhpksdd_quan12.1" />
+        </ogc:Filter>
+    </wfs:Delete>
+</wfs:Transaction>

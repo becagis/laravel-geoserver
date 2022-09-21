@@ -1,0 +1,39 @@
+<wfs:Transaction service="WFS" version="1.1.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs" xmlns:geonode="http://www.geonode.org/">
+    <wfs:Insert>
+        <geonode:qhpksdd_quan12>
+            <geonode:fid>4</geonode:fid>
+            <geonode:objectid>3</geonode:objectid>
+            <geonode:maopho>ddd</geonode:maopho>
+            <wfs:Property>
+                <wfs:Name>the_geom</wfs:Name>
+                <wfs:Value>
+                    <gml:MultiPolygon srsName="EPSG:4326">
+                        <gml:polygonMember>
+                            <gml:Polygon srsName="EPSG:4326">
+                                <gml:exterior>
+                                    <gml:LinearRing>
+                                        <gml:posList>106.69475942 10.861100879999988 106.69470931 10.861036729999993
+                                            106.69431134 10.861061479999995 106.69427884 10.861063499999993 106.69405642
+                                            10.861077339999992 106.69409573084702 10.860966638085413 106.69383345
+                                            10.861091199999983 106.69336724286221 10.861017214010962 106.69326487
+                                            10.861119060000002 106.69322817000001 10.861120859999989 106.6931481
+                                            10.861124779999997 106.69314705 10.861124829999996 106.69313419
+                                            10.861155780000004 106.69311279000001 10.86120729999998 106.69311272
+                                            10.861207470000005 106.69310055 10.86123075999998 106.69307706
+                                            10.861275690000005 106.69305781 10.861312529999994 106.69305779
+                                            10.861312569999987 106.69303743 10.861344379999984 106.69302184
+                                            10.861368729999995 106.69302346000002 10.861368599999988 106.69319112
+                                            10.861354699999994 106.69322579 10.861351819999982 106.69349223
+                                            10.861329729999982 106.69399201 10.861288299999996 106.6942263
+                                            10.861268869999996 106.69471697 10.861228189999983 106.69473309000001
+                                            10.861179859999993 106.69475942 10.861100879999988</gml:posList>
+                                    </gml:LinearRing>
+                                </gml:exterior>
+                            </gml:Polygon>
+                        </gml:polygonMember>
+                    </gml:MultiPolygon>
+                </wfs:Value>
+            </wfs:Property>
+        </geonode:qhpksdd_quan12>
+    </wfs:Insert>
+</wfs:Transaction>
