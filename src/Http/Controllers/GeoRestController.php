@@ -12,14 +12,20 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 class GeoRestController extends BaseController {
     use ConvertGeoJsonToRestifyTrait, ActionVerifyGeonodeTokenTrait, HandleHttpRequestTrait, ActionReturnStatusTrait, XmlConvertTrait, RemovePrimaryKeyFromDataUpdateTrait;
 
-    protected $geoserverUrl = "https://geoportal.vntts.vn/geoserver";
-    protected $geoRestUrl = "http://localhost:9000/api/georest";
+    protected $geoserverUrl = "";
+    protected $geoRestUrl = "";
     protected $defaultPerPage = 20; 
+
+    public function __construct() {
+        $this->geoserverUrl = config("geonode.url")."/geoserver";
+        $this->geoRestUrl = URL::to("/api/georest");
+    }
 
     public function list(Request $request, $typeName) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
@@ -92,6 +98,7 @@ class GeoRestController extends BaseController {
     public function store(Request $request, $typeName) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
             $data = $request->post();
+            $data = $this->removePrimaryKey($data);
             if (empty($data)) {
                 return $this->returnBadRequest();
             }
