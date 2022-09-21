@@ -50,10 +50,12 @@ class GeoRestController extends BaseController {
 
             $response =  Http::get($url);
             return $this->handleHttpRequest($response, 
+                // success callback
                 function($data) use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
                     return $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, $data, $page, $perPage);
                 }, 
+                // fail callback
                 function() use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
                     return $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, [], $page, $perPage);
