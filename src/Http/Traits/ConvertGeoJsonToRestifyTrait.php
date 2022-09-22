@@ -1,12 +1,15 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Traits;
 
+use TungTT\LaravelGeoNode\Facades\GeoNode as FacadesGeoNode;
+
 trait ConvertGeoJsonToRestifyTrait {
     protected function convertGeoJsonToRestifyResponse($typeName, $apiUrl, $data, $page, $perPage) {
         return [
             'meta' => $this->getRestMeta($apiUrl, $data, $page, $perPage),
             'links' => $this->getRestLinks($apiUrl, $data, $page, $perPage),
-            'data' => $this->getRestData($typeName, $data)
+            'data' => $this->getRestData($typeName, $data),
+            'accessToken' => FacadesGeoNode::getAccessToken()
         ];
     }
 
@@ -53,6 +56,7 @@ trait ConvertGeoJsonToRestifyTrait {
         $features = $data['features']?? [];
         foreach ($features as $feature) {
             $props = $feature['properties'];
+            $props[$feature["geometry_name"]] = $feature["geometry"];
             array_push($result, [
                 'id' => $feature['id'],
                 'type' => $typeName,
