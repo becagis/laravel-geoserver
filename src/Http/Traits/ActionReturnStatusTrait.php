@@ -15,4 +15,8 @@ trait ActionReturnStatusTrait {
     protected function returnNoContent() {
         return response()->noContent(Response::HTTP_NO_CONTENT);
     }
+
+    protected function returnOK() {
+        return response()->noContent(Response::HTTP_OK);
+    }
 }

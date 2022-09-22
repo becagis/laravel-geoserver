@@ -21,5 +21,5 @@ trait HandleHttpRequestTrait {
             return $successCallback($data);
         }
         abort(404);
-        }
     }
+}
