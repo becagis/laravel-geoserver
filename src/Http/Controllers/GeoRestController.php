@@ -6,6 +6,8 @@ use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionVerifyGeonodeTokenTrait;
+use BecaGIS\LaravelGeoserver\Http\Traits\ConvertWfsTypeToLocalTypeTrait;
+use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\RemovePrimaryKeyFromDataUpdateTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
 use Exception;
@@ -16,7 +18,14 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 class GeoRestController extends BaseController {
-    use ConvertGeoJsonToRestifyTrait, ActionVerifyGeonodeTokenTrait, HandleHttpRequestTrait, ActionReturnStatusTrait, XmlConvertTrait, RemovePrimaryKeyFromDataUpdateTrait;
+    use ConvertGeoJsonToRestifyTrait, 
+        ActionVerifyGeonodeTokenTrait, 
+        HandleHttpRequestTrait, 
+        ActionReturnStatusTrait, 
+        XmlConvertTrait, 
+        RemovePrimaryKeyFromDataUpdateTrait,
+        ConvertWfsTypeToLocalTypeTrait,
+        GeonodeDbTrait;
 
     protected $geoserverUrl = "";
     protected $geoRestUrl = "";
@@ -147,5 +156,25 @@ class GeoRestController extends BaseController {
                 }
             });
         }); 
+    }
+
+    public function getters(Request $request, $typeName, $getter) {
+        return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $getter) {
+            return match ($getter) {
+                'attribute_set' => $this->gettersAttributeSet($typeName)
+            };
+        });
+    }
+
+    public function gettersAttributeSet($typeName) {
+        $sql = <<<EOD
+            SELECT attribute, description, attribute_label, attribute_type, visible, display_order  
+            FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
+            WHERE typename = ?
+        EOD;
+        $rows = $this->getDbConnection()->select($sql, [$typeName]);
+        return [
+            'attributes' => $rows
+        ];
     }
 }   
