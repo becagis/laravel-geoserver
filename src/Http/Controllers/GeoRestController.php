@@ -162,7 +162,7 @@ class GeoRestController extends BaseController {
         return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $getter) {
             return match ($getter) {
                 'attribute_set' => $this->gettersAttributeSet($typeName),
-                'default' => $this->returnBadRequest()
+                default => $this->returnBadRequest()
             };
         });
     }
