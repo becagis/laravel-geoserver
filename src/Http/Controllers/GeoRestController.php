@@ -175,7 +175,7 @@ class GeoRestController extends BaseController {
         EOD;
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return [
-            'data' => $rows
+            'data' => $rows 
         ];
     }
 }   
