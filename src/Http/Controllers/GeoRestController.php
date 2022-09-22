@@ -171,7 +171,7 @@ class GeoRestController extends BaseController {
         $sql = <<<EOD
             SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
             FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE typename = ? and visible
+            WHERE typename = ? and visible order by display_order
         EOD;
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return [
