@@ -151,11 +151,7 @@ class WfsTransaction {
             $result .= "<{$this->typeName}>\n";
             foreach ($this->creates as $create) {
                 $result .= <<<EOD
-                    <wfs:Property>
-                        <wfs:Name>{$create->name}</wfs:Name>
-                        <wfs:Value>{$create->value}</wfs:Value>
-                    </wfs:Property>
-
+                    <geonode:{$create->name}>{$create->value}</geonode:{$create->name}>
                 EOD;
             }
             $result .= "</{$this->typeName}>\n";
