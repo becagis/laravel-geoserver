@@ -224,7 +224,9 @@ class WfsTransaction {
                     default => ''
                 };
                 if (!empty($geomXML)) {
-                    $result .= $geomXML;
+                    $result .= <<<EOD
+                            <geonode:{$geom->name}>{$geomXML}</geonode:{$geom->name}>
+                    EOD;
                 }
             }
         }
@@ -244,7 +246,12 @@ class WfsTransaction {
                 if (!empty($geomXML)) {
                     $result .= <<<EOD
                         <wfs:Update typeName="{$geom->typeName}">
-                        {$geomXML}
+                            <wfs:Property>
+                                <wfs:Name>{$geom->name}</wfs:Name>
+                                <wfs:Value>
+                                    {$geomXML}
+                                </wfs:Value>
+                            </wfs:Property>
                             <ogc:Filter>
                                 <ogc:FeatureId fid="{$geom->fid}" />
                             </ogc:Filter>
