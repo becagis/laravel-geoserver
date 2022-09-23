@@ -33,6 +33,53 @@ class GeoRestController extends BaseController {
 
     public function __construct() {
         $this->geoRestUrl = URL::to("/api/georest");
+        $this->geoStatsUrl = config("geoserver.nodetools_url");
+    }
+
+    public function geostats(Request $request) {
+        $typeValidator = Validator::make($request->all(), [
+            'type' => 'string'
+        ]);
+        if ($typeValidator->fails()) return $typeValidator->errors();
+        $type = $typeValidator->validated()['type'];
+        
+        $validator = null;
+        if ($type == 'circle') {
+            $validator = Validator::make($request->post(), [
+                'lat' => 'numeric',
+                'long' => 'numeric',
+                'radius' => 'numeric',
+            ]);
+        } else if ($type == 'polygon') {
+            $validator = Validator::make($request->post(), [
+                'geojson' => 'required'
+            ]);
+        }
+
+        if ($validator == null || $validator->fails()) {
+            return $validator->errors();
+        } else {
+            $validated = $validator->validated();
+        }
+
+        $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
+
+        $url = "{$baseUrl}?type={$type}";
+        $http = Http::post($url, $validated);
+        return $this->handleHttpRequest(
+            $http, 
+            function($data) use ($validated){
+                if (isset($validated['layer'])) {
+                    return ["data" => $this->getRestDataFromGeoStatsInLayer($data["data"])];
+                } else {
+                    return $data;
+                }
+                
+            },
+            function() {
+                return $this->returnBadRequest();
+            }
+        );
     }
 
     public function list(Request $request, $typeName) {

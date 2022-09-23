@@ -4,6 +4,8 @@ use BecaGIS\LaravelGeoserver\Http\Controllers\GeoRestController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
+Route::post('/api/georest/geostats', [GeoRestController::class, 'geostats'])
+                ->name('api.georest.geostats')->middleware('web')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/api/georest/{typeName}', [GeoRestController::class, 'list'])
                 ->name('api.georest.list')->middleware('web');
 Route::get('/api/georest/{typeName}/getters/{getter}', [GeoRestController::class, 'getters'])

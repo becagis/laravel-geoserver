@@ -20,8 +20,8 @@ trait ConvertGeoJsonToRestifyTrait {
                     "type" => $typeName,
                     "attributes" => $objData,
                     "meta" => []
-                ]
-            ];
+                ]   
+            ];  
     }
 
     protected function getRestMeta($apiUrl, $data, $page, $perPage) {
@@ -63,6 +63,17 @@ trait ConvertGeoJsonToRestifyTrait {
                 'attributes' => $props,
                 'meta' => []
             ]);
+        }
+        return $result;
+    }
+
+    protected function getRestDataFromGeoStatsInLayer($data) {
+        $result = [];
+        foreach ($data as $arr) {
+            foreach ($arr as $item) {
+                
+                array_push($result, ["name" => $item["name"], "attributes" => $item["properties"]]);
+            }
         }
         return $result;
     }
