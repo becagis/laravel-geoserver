@@ -10,6 +10,8 @@ Route::get('/api/georest/{typeName}/getters/{getter}', [GeoRestController::class
                 ->name('api.georest.getters')->middleware('web');
 Route::get('/api/georest/{typeName}/search', [GeoRestController::class, 'search'])
                 ->name('api.georest.search')->middleware('web');
+Route::get('/api/georest/{typeName}/{fid}', [GeoRestController::class, 'show'])
+                ->name('api.georest.show')->middleware('web');
 Route::put('/api/georest/{typeName}/{fid}', [GeoRestController::class, 'update'])
                 ->name('api.georest.update')->middleware('web')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::post('/api/georest/{typeName}', [GeoRestController::class, 'store'])

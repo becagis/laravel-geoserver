@@ -77,6 +77,24 @@ class GeoRestController extends BaseController {
         return $this->list($request, $typeName);
     }
 
+    public function show(Request $request, $typeName, $fid) {
+        return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
+            $urlApi = "{$this->geoserverUrl}/ows?accessToken={$accessToken}&typeName={$typeName}&request=getFeature&service=wfs&version=2.0.0&featureID={$fid}&outputFormat=application/json";
+            $response = Http::get($urlApi);
+            $successCallback = function($data) use($typeName, $fid) {    
+                try {
+                    return $this->getRestData($typeName, $data)[0];
+                } catch (Exception $ex) {
+                    return (object)[];
+                }
+            };
+            $failCallback = function() {
+                return $this->returnBadRequest();
+            };
+            return $this->handleHttpRequest($response, $successCallback, $failCallback);
+        }) ;
+    }
+
     public function update(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             $data = $request->post();
