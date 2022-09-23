@@ -1,6 +1,7 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Controllers;
 
+use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
 use BecaGIS\LaravelGeoserver\Http\Resources\WfsTransaction;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
@@ -26,13 +27,11 @@ class GeoRestController extends BaseController {
         RemovePrimaryKeyFromDataUpdateTrait,
         ConvertWfsTypeToLocalTypeTrait,
         GeonodeDbTrait;
-
-    protected $geoserverUrl = "";
+    
     protected $geoRestUrl = "";
     protected $defaultPerPage = 20; 
 
     public function __construct() {
-        $this->geoserverUrl = config("geonode.url")."/geoserver";
         $this->geoRestUrl = URL::to("/api/georest");
     }
 
@@ -48,9 +47,12 @@ class GeoRestController extends BaseController {
             $perPage = $this->defaultPerPage;
             $startIndex = $perPage * ($page - 1);
 
-            $url = "{$this->geoserverUrl}/ows?" 
-                        . "service=WFS&version=2.0.0&request=GetFeature&typeNames={$typeName}" 
-                        . "&access_token={$accessToken}&outputFormat=application/json&count={$perPage}&startIndex={$startIndex}";
+            $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
+                'request' => 'GetFeature',
+                'typeNames' => $typeName,
+                'count' => $perPage,
+                'startIndex' => $startIndex
+            ])->url();
 
             $cql_filter = $validated['cql_filter']?? '';
             if (!empty($cql_filter)) {
@@ -79,7 +81,7 @@ class GeoRestController extends BaseController {
 
     public function show(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $urlApi = "{$this->geoserverUrl}/ows?accessToken={$accessToken}&typeName={$typeName}&request=getFeature&service=wfs&version=2.0.0&featureID={$fid}&outputFormat=application/json";
+            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&fid={$fid}")->url();  
             $response = Http::get($urlApi);
             $successCallback = function($data) use($typeName, $fid) {    
                 try {
@@ -103,7 +105,7 @@ class GeoRestController extends BaseController {
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, $fid)->addUpdateProps($data)->xml();
-            $apiUrl = "{$this->geoserverUrl}/ows?access_token={$accessToken}&outputFormat=application/json";
+            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
@@ -132,7 +134,7 @@ class GeoRestController extends BaseController {
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
-            $apiUrl = "{$this->geoserverUrl}/ows?access_token={$accessToken}&outputFormat=application/json";
+            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
@@ -157,7 +159,7 @@ class GeoRestController extends BaseController {
     public function delete(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
-            $apiUrl = "{$this->geoserverUrl}/ows?access_token={$accessToken}&outputFormat=application/json";
+            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
