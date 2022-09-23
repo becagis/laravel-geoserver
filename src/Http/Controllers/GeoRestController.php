@@ -81,7 +81,7 @@ class GeoRestController extends BaseController {
 
     public function show(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&fid={$fid}")->url();  
+            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&featureId={$fid}")->url();  
             $response = Http::get($urlApi);
             $successCallback = function($data) use($typeName, $fid) {    
                 try {
