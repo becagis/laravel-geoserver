@@ -36,6 +36,18 @@ class GeoRestController extends BaseController {
         $this->geoStatsUrl = config("geoserver.nodetools_url");
     }
 
+    public function geoStatsSearch(Request $request) {
+        $query = $request->get('query', '');
+        $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query";
+
+        $http = Http::get($baseUrl);
+        return $this->handleHttpRequest($http, function($data) {
+            return $data;
+        }, function () {
+            return $this->returnBadRequest();
+        });
+    }
+
     public function geostats(Request $request) {
         $typeValidator = Validator::make($request->all(), [
             'type' => 'string'
