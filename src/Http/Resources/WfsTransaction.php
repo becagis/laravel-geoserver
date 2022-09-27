@@ -151,9 +151,10 @@ class WfsTransaction {
             $result .= "<{$this->typeName}>\n";
             foreach ($this->creates as $create) {
                 $result .= <<<EOD
-                    <geonode:{$create->name}>{$create->value}</geonode:{$create->name}>
+                    <geonode:{$create->name}>{$create->value}</geonode:{$create->name}>\n
                 EOD;
             }
+            $result .= $this->buildCreateGeoms();
             $result .= "</{$this->typeName}>\n";
             $result .= "</wfs:Insert>";
         }
@@ -207,7 +208,6 @@ class WfsTransaction {
             {$this->buildDeletes()}
             {$this->buildUpdates()}
             {$this->buildUpdateGeoms()}
-            {$this->buildCreateGeoms()}
         </wfs:Transaction>
         EOD;
         return $result;
@@ -225,7 +225,7 @@ class WfsTransaction {
                 };
                 if (!empty($geomXML)) {
                     $result .= <<<EOD
-                            <geonode:{$geom->name}>{$geomXML}</geonode:{$geom->name}>
+                            <geonode:{$geom->name}>{$geomXML}</geonode:{$geom->name}>\n
                     EOD;
                 }
             }

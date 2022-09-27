@@ -206,6 +206,7 @@ class GeoRestController extends BaseController {
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
+            //dd($xml);
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
@@ -215,6 +216,7 @@ class GeoRestController extends BaseController {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
                     if (isset($xmlJson->Exception)) {
+                        dd($xmlJson->Exception);    
                         throw new Exception();
                     }
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
