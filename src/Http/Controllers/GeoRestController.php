@@ -66,7 +66,7 @@ class GeoRestController extends BaseController {
 
     public function geostats(Request $request) {
         $typeValidator = Validator::make($request->all(), [
-            'type' => 'string'
+            'type' => 'string',
         ]);
         if ($typeValidator->fails()) return $typeValidator->errors();
         $type = $typeValidator->validated()['type'];
@@ -90,9 +90,11 @@ class GeoRestController extends BaseController {
             $validated = $validator->validated();
         }
 
+        $layers = $request->get('layers', null);
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
-        $url = "{$baseUrl}?type={$type}";
+        $url = "{$baseUrl}?type={$type}" . ($layers == null ? '' : "&layers=$layers");
         $http = Http::post($url, $validated);
         return $this->handleHttpRequest(
             $http, 
