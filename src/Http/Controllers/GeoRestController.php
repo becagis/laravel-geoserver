@@ -19,17 +19,17 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 class GeoRestController extends BaseController {
-    use ConvertGeoJsonToRestifyTrait, 
-        ActionVerifyGeonodeTokenTrait, 
-        HandleHttpRequestTrait, 
-        ActionReturnStatusTrait, 
-        XmlConvertTrait, 
+    use ConvertGeoJsonToRestifyTrait,
+        ActionVerifyGeonodeTokenTrait,
+        HandleHttpRequestTrait,
+        ActionReturnStatusTrait,
+        XmlConvertTrait,
         RemovePrimaryKeyFromDataUpdateTrait,
         ConvertWfsTypeToLocalTypeTrait,
         GeonodeDbTrait;
-    
+
     protected $geoRestUrl = "";
-    protected $defaultPerPage = 20; 
+    protected $defaultPerPage = 20;
 
     public function __construct() {
         $this->geoRestUrl = URL::to("/api/georest");
@@ -50,10 +50,10 @@ class GeoRestController extends BaseController {
 
     public function geoStatsCountFeatures(Request $request) {
         $layers = $request->get('layers', null);
-        
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features";
         $baseUrl = isset($layers) ? "$baseUrl?layers=$layers" : $baseUrl;
-        
+
         $http = Http::get($baseUrl);
         return $this->handleHttpRequest($http, function($data) {
             return $data;
@@ -66,10 +66,10 @@ class GeoRestController extends BaseController {
         $query = $request->get('query', '');
         $page = $request->get('page', 0);
         $layers = $request->get('layers', null);
-        
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
         $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
-        
+
         $http = Http::get($baseUrl);
         return $this->handleHttpRequest($http, function($data) {
             return $data;
@@ -84,7 +84,7 @@ class GeoRestController extends BaseController {
         ]);
         if ($typeValidator->fails()) return $typeValidator->errors();
         $type = $typeValidator->validated()['type'];
-        
+
         $validator = null;
         if ($type == 'circle') {
             $validator = Validator::make($request->post(), [
@@ -111,14 +111,14 @@ class GeoRestController extends BaseController {
         $url = "{$baseUrl}?type={$type}" . ($layers == null ? '' : "&layers=$layers");
         $http = Http::post($url, $validated);
         return $this->handleHttpRequest(
-            $http, 
+            $http,
             function($data) use ($validated){
                 if (isset($validated['layer'])) {
                     return ["data" => $this->getRestDataFromGeoStatsInLayer($data["data"])];
                 } else {
                     return $data;
                 }
-                
+
             },
             function() {
                 return $this->returnBadRequest();
@@ -129,10 +129,10 @@ class GeoRestController extends BaseController {
     public function list(Request $request, $typeName) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
             $validator = Validator::make($request->all(), [
-                'page' => 'integer', 
+                'page' => 'integer',
                 'cql_filter' => 'string'
             ]);
-            
+
             $validated = $validator->validated();
             $page = $validated['page'] ?? 1;
             $perPage = $this->defaultPerPage;
@@ -151,12 +151,12 @@ class GeoRestController extends BaseController {
             }
 
             $response =  Http::get($url);
-            return $this->handleHttpRequest($response, 
+            return $this->handleHttpRequest($response,
                 // success callback
                 function($data) use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
                     return $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, $data, $page, $perPage);
-                }, 
+                },
                 // fail callback
                 function() use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
@@ -172,9 +172,9 @@ class GeoRestController extends BaseController {
 
     public function show(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&featureId={$fid}")->url();  
+            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&featureId={$fid}")->url();
             $response = Http::get($urlApi);
-            $successCallback = function($data) use($typeName, $fid) {    
+            $successCallback = function($data) use($typeName, $fid) {
                 try {
                     return $this->getRestData($typeName, $data)[0];
                 } catch (Exception $ex) {
@@ -200,7 +200,7 @@ class GeoRestController extends BaseController {
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
-            
+
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $data, $fid) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
@@ -214,7 +214,7 @@ class GeoRestController extends BaseController {
                     return $this->returnBadRequest();
                 }
             });
-        }); 
+        });
     }
 
     public function store(Request $request, $typeName) {
@@ -230,12 +230,12 @@ class GeoRestController extends BaseController {
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
-            
+
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $data) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
                     if (isset($xmlJson->Exception)) {
-                        dd($xmlJson->Exception);    
+                        dd($xmlJson->Exception);
                         throw new Exception();
                     }
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
@@ -256,7 +256,7 @@ class GeoRestController extends BaseController {
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
-            
+
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
@@ -268,7 +268,7 @@ class GeoRestController extends BaseController {
                     return $this->returnBadRequest();
                 }
             });
-        }); 
+        });
     }
 
     public function getters(Request $request, $typeName, $getter) {
@@ -284,11 +284,11 @@ class GeoRestController extends BaseController {
         $sql = <<<EOD
             SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
             FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE typename = ? and visible order by display_order
+            WHERE typename = ? order by display_order
         EOD;
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return [
-            'data' => $rows 
+            'data' => $rows
         ];
     }
-}   
+}
