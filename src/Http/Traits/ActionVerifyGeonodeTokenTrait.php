@@ -14,4 +14,4 @@ trait ActionVerifyGeonodeTokenTrait {
             abort(403);
         }
     }
-}
+}   

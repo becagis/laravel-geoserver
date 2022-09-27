@@ -51,8 +51,11 @@ class GeoRestController extends BaseController {
     public function geoStatsSearch(Request $request) {
         $query = $request->get('query', '');
         $page = $request->get('page', 0);
+        $layers = $request->get('layers', null);
+        
         $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
-
+        $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
+        
         $http = Http::get($baseUrl);
         return $this->handleHttpRequest($http, function($data) {
             return $data;
