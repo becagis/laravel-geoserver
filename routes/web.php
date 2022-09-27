@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/api/georest/labels', [GeoRestController::class, 'geostatsLabels'])
                 ->name('api.georest.geostats.labels')->middleware('web')->withoutMiddleware([VerifyCsrfToken::class]);
+Route::get('/api/georest/count-features', [GeoRestController::class, 'geoStatsCountFeatures'])
+                ->name('api.georest.geostats.countFeatures')->middleware('web')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::get('/api/georest/search', [GeoRestController::class, 'geostatsSearch'])
                 ->name('api.georest.geostats.search')->middleware('web')->withoutMiddleware([VerifyCsrfToken::class]);
 Route::post('/api/georest/geostats', [GeoRestController::class, 'geostats'])

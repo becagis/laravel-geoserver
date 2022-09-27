@@ -12,6 +12,7 @@ class LaravelGeoserverServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('laravel-geoserver')
+            ->hasMigrations(['create_objects_recovery_table'])
             ->hasConfigFile()
             ->hasViews()
             ->hasRoute('web');
