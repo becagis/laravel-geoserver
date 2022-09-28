@@ -1,7 +1,11 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Controllers;
 
+use App\Facades\GeoNode;
 use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
+use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\GeoFeatureRepositoryFacade;
+use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\ObjectsRecoveryRepositoryFacade;
+use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
 use BecaGIS\LaravelGeoserver\Http\Resources\WfsTransaction;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
@@ -50,9 +54,10 @@ class GeoRestController extends BaseController {
 
     public function geoStatsCountFeatures(Request $request) {
         $layers = $request->get('layers', null);
+        $tablePrefix = $this->getWorkSpace();
 
-        $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features";
-        $baseUrl = isset($layers) ? "$baseUrl?layers=$layers" : $baseUrl;
+        $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features?tablePrefix=$tablePrefix";
+        $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
         $http = Http::get($baseUrl);
         return $this->handleHttpRequest($http, function($data) {
@@ -171,21 +176,12 @@ class GeoRestController extends BaseController {
     }
 
     public function show(Request $request, $typeName, $fid) {
-        return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $urlApi = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParamsString("typeName={$typeName}&featureId={$fid}")->url();
-            $response = Http::get($urlApi);
-            $successCallback = function($data) use($typeName, $fid) {
-                try {
-                    return $this->getRestData($typeName, $data)[0];
-                } catch (Exception $ex) {
-                    return (object)[];
-                }
-            };
-            $failCallback = function() {
-                return $this->returnBadRequest();
-            };
-            return $this->handleHttpRequest($response, $successCallback, $failCallback);
-        }) ;
+        try {
+            $data = GeoFeatureRepositoryFacade::get($typeName, $fid);
+            return $data;
+        } catch (Exception $ex) {
+            return (object)[];
+        }
     }
 
     public function update(Request $request, $typeName, $fid) {
@@ -218,35 +214,11 @@ class GeoRestController extends BaseController {
     }
 
     public function store(Request $request, $typeName) {
-        return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
-            $data = $request->post();
-            $data = $this->removePrimaryKey($data);
-            if (empty($data)) {
-                return $this->returnBadRequest();
-            }
-            $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
-            //dd($xml);
-            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
-            $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
-                'body' => $xml
-            ]);
-
-            return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $data) {
-                try {
-                    $xmlJson = $this->convertWfsXmlToObj($rd->body());
-                    if (isset($xmlJson->Exception)) {
-                        dd($xmlJson->Exception);
-                        throw new Exception();
-                    }
-                    $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
-                    if ($fid != null) {
-                        return $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
-                    }
-                } catch (Exception $ex) {
-                    return $this->returnBadRequest();
-                }
-            });
-        });
+        try {
+           return GeoFeatureRepositoryFacade::store($typeName, $request->post());
+        } catch (Exception $ex) {
+            return $this->returnBadRequest();
+        }
     }
 
     public function delete(Request $request, $typeName, $fid) {
@@ -256,6 +228,7 @@ class GeoRestController extends BaseController {
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
+            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
 
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid) {
                 try {
@@ -275,6 +248,8 @@ class GeoRestController extends BaseController {
         return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $getter) {
             return match ($getter) {
                 'attribute_set' => $this->gettersAttributeSet($typeName),
+                'trash' => $this->gettersTrash($typeName),
+                'trash-restore' => $this->gettersTrashRestore($typeName),
                 default => $this->returnBadRequest()
             };
         });
@@ -289,6 +264,13 @@ class GeoRestController extends BaseController {
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return [
             'data' => $rows
+        ];
+    }
+
+    public function gettersTrash($typeName) {
+        $data = ObjectsRecoveryRepositoryFacade::list($typeName);
+        return [
+            'data' => $data
         ];
     }
 }
