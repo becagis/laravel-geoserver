@@ -27,7 +27,6 @@ class ObjectsRecoveryRepository {
                     'geom' => json_encode($this->getGeometry($obj_attributes)),
                     'status' => ObjectsRecoveryModel::$STATUS_INTRASH
                 ];
-                
                 ObjectsRecoveryModel::create($data);
             } catch (Exception $ex) {
             }

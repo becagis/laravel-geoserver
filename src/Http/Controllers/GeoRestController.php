@@ -223,13 +223,13 @@ class GeoRestController extends BaseController {
 
     public function delete(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
+            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
+            
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
-            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
-
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
