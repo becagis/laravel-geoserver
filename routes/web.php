@@ -16,6 +16,8 @@ Route::get('/api/georest/{typeName}', [GeoRestController::class, 'list'])
                 ->name('api.georest.list')->middleware('web');
 Route::get('/api/georest/{typeName}/getters/{getter}', [GeoRestController::class, 'getters'])
                 ->name('api.georest.getters')->middleware('web');
+Route::get('/api/georest/{typeName}/actions/{action}', [GeoRestController::class, 'actions'])
+                ->name('api.georest.actions')->middleware('web');
 Route::get('/api/georest/{typeName}/search', [GeoRestController::class, 'search'])
                 ->name('api.georest.search')->middleware('web');
 Route::get('/api/georest/{typeName}/{fid}', [GeoRestController::class, 'show'])

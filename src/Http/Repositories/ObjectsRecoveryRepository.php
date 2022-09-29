@@ -48,14 +48,14 @@ class ObjectsRecoveryRepository {
             $objRecovery->status = ObjectsRecoveryModel::$STATUS_RESTORED;
             $objRecovery->save();
         } catch (Exception $ex) {
-            dd($ex);
+            
         }
     }
 
     public function list($typeName) {
         $sql = "select * from objects_recovery where object_type = ? and restored_at is null order by created_at desc";
         $rows = $this->getDbPSQL()->select($sql, [$typeName]);
-        dd($rows);
+        return $rows;
     }
 
     protected function getGeometry($attributes) {

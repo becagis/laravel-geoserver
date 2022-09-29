@@ -249,7 +249,16 @@ class GeoRestController extends BaseController {
             return match ($getter) {
                 'attribute_set' => $this->gettersAttributeSet($typeName),
                 'trash' => $this->gettersTrash($typeName),
-                'trash-restore' => $this->gettersTrashRestore($typeName),
+                default => $this->returnBadRequest()
+            };
+        });
+    }
+
+    public function actions(Request $request, $typeName, $action) {
+        return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $action) {
+            return match ($action) {
+                // ?id=objectRecoveryId
+                'restore' => $this->gettersTrashRestore(),
                 default => $this->returnBadRequest()
             };
         });
@@ -272,5 +281,17 @@ class GeoRestController extends BaseController {
         return [
             'data' => $data
         ];
+    }
+
+    public function gettersTrashRestore() {
+        $data = request()->all();
+        $id = isset($data['id']) ? $data['id'] : null;
+        if ($id != null) {
+            ObjectsRecoveryRepositoryFacade::restoreRecoveryToGeoDbFeature($id);
+            return $this->returnOK();
+        } else {
+            dd($id);
+            return $this->returnBadRequest();
+        }
     }
 }
