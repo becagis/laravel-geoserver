@@ -121,6 +121,11 @@ class GeoRestController extends BaseController {
 
         $layers = $request->get('layers', null);
 
+        $user = FacadesGeoNode::user();
+        $userId = $user->provider_id;
+        $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
+        
+        $layers = implode(',', $listLayersCanAccess);
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
         $url = "{$baseUrl}?type={$type}" . ($layers == null ? '' : "&layers=$layers");

@@ -19,15 +19,20 @@ class PermRepositry {
         return $instance;
     }
 
+    // actorId -> provider_id/group_id, actorType: user, group
+    // perms: ['', '', '']
+    // listTypeName: ['layera', 'layerb']
     public function filterListLayerTypeNameCanAccess($actorId, $actorType, $perms, $listTypeName) {
         $listLayers = $this->getLayersActorCanAccess($actorId, $actorType, $perms);
         $permLayers = array_column($listLayers, 'typename');
+        
         if (!isset($listTypeName) || empty($listTypeName)) {
             return $permLayers;
         } else {
             $res = [];
+            $listTypeName = is_string($listTypeName) ? explode(',', $listTypeName) : $listTypeName;
             foreach ($listTypeName as $typename) {
-                if (in_array($typename, $permLayers)) {
+                if (in_array($typename, $permLayers) || in_array("geonode:$typename", $permLayers)) {
                     array_push($res, $typename);
                 }
             } 
