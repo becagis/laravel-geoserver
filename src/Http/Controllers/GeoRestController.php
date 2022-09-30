@@ -6,6 +6,8 @@ use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
 use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\GeoFeatureRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\ObjectsRecoveryRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
+use BecaGIS\LaravelGeoserver\Http\Repositories\PermRepositry;
+use BecaGIS\LaravelGeoserver\Http\Repositories\ResourceBaseRepository;
 use BecaGIS\LaravelGeoserver\Http\Resources\WfsTransaction;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
@@ -21,6 +23,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use TungTT\LaravelGeoNode\Facades\GeoNode as FacadesGeoNode;
 
 class GeoRestController extends BaseController {
     use ConvertGeoJsonToRestifyTrait,
@@ -68,18 +71,25 @@ class GeoRestController extends BaseController {
     }
 
     public function geoStatsSearch(Request $request) {
-        $query = $request->get('query', '');
-        $page = $request->get('page', 0);
-        $layers = $request->get('layers', null);
+        return $this->actionVerifyGeonodeToken(function($accessToken) use($request){
+            $query = $request->get('query', '');
+            $page = $request->get('page', 0);
+            $layers = $request->get('layers', null);
 
-        $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
-        $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
+            $user = FacadesGeoNode::user();
+            $userId = $user->provider_id;
 
-        $http = Http::get($baseUrl);
-        return $this->handleHttpRequest($http, function($data) {
-            return $data;
-        }, function () {
-            return $this->returnBadRequest();
+            $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
+            $layers = implode(',', $listLayersCanAccess);
+            $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
+            $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
+    
+            $http = Http::get($baseUrl);
+            return $this->handleHttpRequest($http, function($data) {
+                return $data;
+            }, function () {
+                return $this->returnBadRequest();
+            });
         });
     }
 
@@ -223,13 +233,13 @@ class GeoRestController extends BaseController {
 
     public function delete(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
-            
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
+            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
+
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
