@@ -157,13 +157,18 @@ class GeoRestController extends BaseController {
             $page = $validated['page'] ?? 1;
             $perPage = $this->defaultPerPage;
             $startIndex = $perPage * ($page - 1);
-
-            $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
+            $params = [
                 'request' => 'GetFeature',
                 'typeNames' => $typeName,
                 'count' => $perPage,
                 'startIndex' => $startIndex
-            ])->url();
+            ];
+            $pkCol = ResourceBaseRepository::instance()->getPkColumnName($typeName);
+            if (isset($pkCol)) {
+                $params['sortBy'] = "$pkCol D";
+            }
+
+            $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams($params)->url();
 
             $cql_filter = $validated['cql_filter']?? '';
             if (!empty($cql_filter)) {
@@ -238,12 +243,12 @@ class GeoRestController extends BaseController {
 
     public function delete(Request $request, $typeName, $fid) {
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
+            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
                 'body' => $xml
             ]);
-            ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
 
             return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid) {
                 try {

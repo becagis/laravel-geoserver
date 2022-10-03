@@ -2,12 +2,14 @@
 namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 
 use BecaGIS\LaravelGeoserver\Http\Builders\MapstoreMapJsonBuilder;
+use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
 class ResourceBaseRepository {
-    use HandleHttpRequestTrait;
+    use HandleHttpRequestTrait, GeonodeDbTrait;
     
     protected static $instance;
     public static function instance() {
@@ -30,5 +32,23 @@ class ResourceBaseRepository {
             dd($http);
         };
         return $this->handleHttpRequest($http, $successCall, $failCall);
+    }
+
+    public function getPkColumnName($typeName) {
+        $sql = <<<EOD
+            select column_name from information_schema.table_constraints tco
+            join information_schema.key_column_usage kcu 
+                on kcu.constraint_name = tco.constraint_name
+                and kcu.constraint_schema = tco.constraint_schema
+                and kcu.constraint_name = tco.constraint_name
+            where tco.constraint_type = 'PRIMARY KEY' and tco.table_name=?
+        EOD;
+        try {
+            $tablename = explode(':', $typeName)[1];
+            $rows = $this->getDbShpConnection()->select($sql, [$tablename]);
+            return $rows[0]->column_name;
+        } catch (Exception $ex) {
+            return null;
+        }
     }
 }

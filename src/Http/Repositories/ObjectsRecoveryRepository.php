@@ -12,7 +12,8 @@ class ObjectsRecoveryRepository {
     use GeonodeDbTrait;
     public function createRecoveryFromGeoDbFeature($typeName, $fid) {
         $feature = GeoFeatureRepositoryFacade::get($typeName, $fid);
-        if (isset($feature['id'])) {
+        $id = gettype($feature) == 'object' ? $feature->id : $feature['id'];
+        if (isset($id)) {
             try {
                 extract($feature, EXTR_PREFIX_ALL, 'obj');
                 $idSplit = explode('.', $obj_id);
