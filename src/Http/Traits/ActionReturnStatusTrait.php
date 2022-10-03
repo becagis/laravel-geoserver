@@ -8,8 +8,8 @@ trait ActionReturnStatusTrait {
         return response()->noContent(Response::HTTP_CREATED);
     }    
 
-    protected function returnBadRequest() {
-        return response()->noContent(Response::HTTP_BAD_REQUEST);
+    protected function returnBadRequest($message = "Truy cập bị từ chối") {
+        return response()->json(["message" => $message, "status" => false], Response::HTTP_FOUND);
     }
 
     protected function returnNoContent() {

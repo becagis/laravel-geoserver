@@ -4,6 +4,7 @@ namespace BecaGIS\LaravelGeoserver\Http\Traits;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
 trait ActionVerifyGeonodeTokenTrait { 
+    use ActionReturnStatusTrait;
 
     protected function actionVerifyGeonodeToken($successCallback) {
         $accessToken = request('accessToken', null);
@@ -11,7 +12,7 @@ trait ActionVerifyGeonodeTokenTrait {
         if (isset($accessToken)) {
             return $successCallback($accessToken);
         } else {
-            abort(403);
+            return $this->returnBadRequest("Không có quyền truy cập");
         }
     }
 }   
