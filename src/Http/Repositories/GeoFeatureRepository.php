@@ -55,7 +55,7 @@ class GeoFeatureRepository
 
     public function store($typeName, $data)
     {
-        $this->actionVerifyGeonodeToken(function ($accessToken) use ($data, $typeName) {
+        return $this->actionVerifyGeonodeToken(function ($accessToken) use ($data, $typeName) {
             $data = $this->removePrimaryKey($data);
             if (empty($data)) {
                 return $this->returnBadRequest();
