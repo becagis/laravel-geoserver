@@ -54,9 +54,9 @@ class PermRepositry {
             left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
             left join django_content_type ON django_content_type.id = auth_permission.content_type_id
             
-            where (user_id = ? or user_id = -1 or auth_group."name" = 'anonymous') and model in ('resourcebase', ?)
+            where (user_id = ? or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = ?) and model in ('resourcebase', ?)
         EOD;
-        $rows = $this->getDbConnection()->select($sql, [$actorId, $unitType]);
+        $rows = $this->getDbConnection()->select($sql, [$actorId, $actorId, $unitType]);
         $result = [];
         $pk = $unitType . "_id";
         $typenameCol = $unitType . "_typename";
@@ -86,7 +86,7 @@ class PermRepositry {
         };
         $sqlPerms = $this->getPermsQuery($perms);
         $params = $this->getPermsParams($perms);
-        $rows = $this->getDbConnection()->select("$sql and $sqlPerms", [$actorId, ...$params]);
+        $rows = $this->getDbConnection()->select("$sql and $sqlPerms", [$actorId, $actorId, ...$params]);
         return $rows;
     }
 
@@ -140,7 +140,7 @@ class PermRepositry {
             left join django_content_type ON django_content_type.id = guardian_userobjectpermission.content_type_id
             left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
             left join people_profile ON people_profile.id = guardian_userobjectpermission.user_id
-            where (guardian_userobjectpermission.user_id = ? or guardian_userobjectpermission.user_id = -1 or auth_group."name" = 'anonymous') 
+            where (1000 = ? or guardian_userobjectpermission.user_id = ? or guardian_userobjectpermission.user_id = -1 or auth_group."name" = 'anonymous') 
         EOD;
     }
 
@@ -157,7 +157,7 @@ class PermRepositry {
         left join django_content_type ON django_content_type.id = guardian_userobjectpermission.content_type_id
         left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
         left join people_profile ON people_profile.id = guardian_userobjectpermission.user_id
-        where (guardian_userobjectpermission.user_id = ? or guardian_userobjectpermission.user_id = -1 or (auth_group."name" = 'anonymous'))
+        where (1000 = ? or guardian_userobjectpermission.user_id = ? or guardian_userobjectpermission.user_id = -1 or (auth_group."name" = 'anonymous'))
         EOD;
     }
 
