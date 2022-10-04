@@ -49,7 +49,7 @@ class PermRepositry {
             left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
             left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
             left join guardian_groupobjectpermission 
-                ON (guardian_groupobjectpermission.object_pk::integer = layers_layer.resourcebase_ptr_id or guardian_groupobjectpermission.object_pk::integer = maps_map.resourcebase_ptr_id)
+                ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
             left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
             left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
             left join django_content_type ON django_content_type.id = auth_permission.content_type_id

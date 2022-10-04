@@ -18,7 +18,7 @@ trait GeonodeDbTrait {
     public function getDb($dbString) {
         return DB::connection($dbString);
     }
-
+    
     public function getDbPSQL() {
         return DB::connection($this->DbPSQL);   
     }
