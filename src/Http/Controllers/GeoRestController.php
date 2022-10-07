@@ -84,8 +84,6 @@ class GeoRestController extends BaseController {
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
-            dd($baseUrl);
-    
             $http = Http::get($baseUrl);
             return $this->handleHttpRequest($http, function($data) {
                 return $data;
@@ -126,7 +124,7 @@ class GeoRestController extends BaseController {
         $user = FacadesGeoNode::user();
         $userId = $user->provider_id;
         $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
-        
+
         $layers = implode(',', $listLayersCanAccess);
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
@@ -189,7 +187,7 @@ class GeoRestController extends BaseController {
                 // fail callback
                 function() use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
-                    
+
                     $resData = $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, [], $page, $perPage);
                     return $resData;
                 }
