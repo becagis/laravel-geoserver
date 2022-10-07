@@ -76,8 +76,10 @@ class GeoFeatureRepository
                         throw new Exception();
                     }
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
-                    if ($fid != null) {
+                    if ($fid != null && sizeof(explode('.', $fid)) > 1) {
                         return $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
+                    } else {
+                        return $this->returnBadRequest();
                     }
                 } catch (Exception $ex) {
                     return $this->returnBadRequest();

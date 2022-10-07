@@ -146,7 +146,7 @@ class WfsTransaction {
 
     protected function buildCreates() {
         $result = "";
-        if (sizeof($this->creates) > 0) {
+        if (sizeof($this->creates) > 0 || sizeof($this->createGeoms) > 0) {
             $result .= "<wfs:Insert>\n";
             $result .= "<{$this->typeName}>\n";
             foreach ($this->creates as $create) {
