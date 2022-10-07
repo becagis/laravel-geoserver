@@ -83,6 +83,8 @@ class GeoRestController extends BaseController {
             $layers = implode(',', $listLayersCanAccess);
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
+
+            dd($baseUrl);
     
             $http = Http::get($baseUrl);
             return $this->handleHttpRequest($http, function($data) {
@@ -134,7 +136,8 @@ class GeoRestController extends BaseController {
             $http,
             function($data) use ($validated){
                 if (isset($validated['layer'])) {
-                    return ["data" => $this->getRestDataFromGeoStatsInLayer($data["data"])];
+                    $restData = $this->getRestDataFromGeoStatsInLayer($data["data"]);
+                    return ["data" => $restData];
                 } else {
                     return $data;
                 }
@@ -180,12 +183,15 @@ class GeoRestController extends BaseController {
                 // success callback
                 function($data) use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
-                    return $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, $data, $page, $perPage);
+                    $resData = $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, $data, $page, $perPage);
+                    return $resData;
                 },
                 // fail callback
                 function() use($typeName, $page, $perPage) {
                     $apiUrl = "{$this->geoRestUrl}/{$typeName}";
-                    return $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, [], $page, $perPage);
+                    
+                    $resData = $this->convertGeoJsonToRestifyResponse($typeName, $apiUrl, [], $page, $perPage);
+                    return $resData;
                 }
             );
         });

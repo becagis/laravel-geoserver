@@ -61,7 +61,7 @@ class GeoFeatureRepository
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
-            //dd($xml);
+            // dd($xml);
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             //dd($apiUrl);
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [
@@ -72,8 +72,7 @@ class GeoFeatureRepository
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
                     if (isset($xmlJson->Exception)) {
-                        dd($xmlJson->Exception);
-                        throw new Exception();
+                        return $this->returnBadRequest();
                     }
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
                     if ($fid != null && sizeof(explode('.', $fid)) > 1) {
