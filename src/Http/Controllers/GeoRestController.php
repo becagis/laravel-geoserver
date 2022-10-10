@@ -83,8 +83,6 @@ class GeoRestController extends BaseController {
             $layers = implode(',', $listLayersCanAccess);
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
-
-            dd($baseUrl);
     
             $http = Http::get($baseUrl);
             return $this->handleHttpRequest($http, function($data) {
