@@ -221,6 +221,7 @@ class WfsTransaction {
                     'Point' => $this->buildPoint($geom),
                     'MultiLineString' => $this->buildMultiLineString($geom),
                     'MultiPolygon' => $this->buildMultiPolygon($geom),
+                    'Polygon' => $this->buildPolygon($geom),
                     default => ''
                 };
                 if (!empty($geomXML)) {
@@ -241,6 +242,7 @@ class WfsTransaction {
                     'Point' => $this->buildPoint($geom),
                     'MultiLineString' => $this->buildMultiLineString($geom),
                     'MultiPolygon' => $this->buildMultiPolygon($geom),
+                    'Polygon' => $this->buildPolygon($geom),
                     default => ''
                 };
                 if (!empty($geomXML)) {

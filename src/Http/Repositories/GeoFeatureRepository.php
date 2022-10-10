@@ -61,7 +61,6 @@ class GeoFeatureRepository
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
-            // dd($xml);
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             //dd($apiUrl);
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [

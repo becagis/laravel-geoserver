@@ -1,8 +1,11 @@
 <?php
+
 namespace BecaGIS\LaravelGeoserver\Http\Traits;
 
-trait WfsGeomTrait {
-    protected function buildPoint($geom) {
+trait WfsGeomTrait
+{
+    protected function buildPoint($geom)
+    {
         $result = <<<EOD
                     <gml:Point srsDimension="2" srsName="EPSG:4326">
                         <gml:pos>{$geom->value}</gml:pos>
@@ -11,7 +14,8 @@ trait WfsGeomTrait {
         return $result;
     }
 
-    protected function buildMultiLineString($geom) {
+    protected function buildMultiLineString($geom)
+    {
         return <<<EOD
                     <gml:MultiLineString srsName="EPSG:4326">
                         <gml:lineStringMember>
@@ -23,7 +27,8 @@ trait WfsGeomTrait {
         EOD;
     }
 
-    protected function buildMultiPolygon($geom) {
+    protected function buildMultiPolygon($geom)
+    {
         return <<<EOD
                     <gml:MultiPolygon srsName="EPSG:4326">
                         <gml:polygonMember>
@@ -36,6 +41,19 @@ trait WfsGeomTrait {
                             </gml:Polygon>
                         </gml:polygonMember>
                     </gml:MultiPolygon>
+        EOD;
+    }
+
+    protected function buildPolygon($geom)
+    {
+        return <<<EOD
+            <gml:Polygon srsName="EPSG:4326">
+                <gml:exterior>  
+                    <gml:LinearRing>
+                        <gml:posList>{$geom->value}</gml:posList>
+                    </gml:LinearRing>
+                </gml:exterior>
+            </gml:Polygon>
         EOD;
     }
 }
