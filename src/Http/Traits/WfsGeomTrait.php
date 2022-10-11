@@ -27,6 +27,15 @@ trait WfsGeomTrait
         EOD;
     }
 
+    protected function buildLineString($geom)
+    {
+        return <<<EOD
+            <gml:LineString srsName="EPSG:4326">
+                <gml:posList>{$geom->value}</gml:posList>
+            </gml:LineString>
+        EOD;
+    }
+
     protected function buildMultiPolygon($geom)
     {
         return <<<EOD
