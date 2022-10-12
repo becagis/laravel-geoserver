@@ -3,5 +3,5 @@
 namespace BecaGIS\LaravelGeoserver;
 
 class LaravelGeoserver {
-
+ 
 }
