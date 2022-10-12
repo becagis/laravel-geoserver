@@ -16,14 +16,29 @@ class WfsRepository {
     XmlConvertTrait;
 
     protected static $instance;
+    protected $cacheMapFeatureTypeToTableName = null;
     public static function instance() {
-        if (!isset($instance)) {
-            $instance = new WfsRepository();
+        return new WfsRepository();
+    }
+
+    public function getMapTableNameToFeatureType() {
+        $mapFeatureTypes = $this->getMapFeatureTypeToTableName();
+        $result = [];
+        foreach ($mapFeatureTypes as $featureType => $tableName) {
+            $prefix = "";
+            $split = explode(':', $featureType);
+            if (sizeof($split) == 2) {
+                $prefix = $split[0] . ":";
+            }
+            $result[$prefix.$tableName] = $featureType;
         }
-        return $instance;
+        return $result;
     }
 
     public function getMapFeatureTypeToTableName() {
+        if (isset($this->cacheMapFeatureTypeToTableName)) {
+            return $this->cacheMapFeatureTypeToTableName;
+        }
         $accessToken = GeoNode::getAccessToken();
         $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
             'request' => 'GetCapabilities'
@@ -52,6 +67,7 @@ class WfsRepository {
                         $mapTableName[$name] = $tableName; 
                     }
                 }
+                $this->cacheMapFeatureTypeToTableName = $mapTableName;
                 return $mapTableName;
             } catch (Exception $ex) {
                 return [];

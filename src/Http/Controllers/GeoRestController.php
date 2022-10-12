@@ -68,7 +68,27 @@ class GeoRestController extends BaseController {
 
         $http = Http::get($baseUrl);
         return $this->handleHttpRequest($http, function($data) {
-            return $data;
+            try {
+                $mapTables = WfsRepository::instance()->getMapTableNameToFeatureType();
+                $items = $data["data"];
+                foreach ($items as $idx => $item) {
+                    $prefix = "";
+                    $name = $item["name"];
+                    $split = explode(":", $name);
+                    if (sizeof($split) == 2) {
+                        $prefix = $split[0].":";
+                        $name = $split[1];
+                    }
+                    if (isset($mapTables[$name])) {
+                        $item["name"] = $prefix.":".$mapTables[$name];
+                    }
+                    $items[$idx] = $item;
+                }
+                $data['data'] = $items;
+                return $data;
+            } catch (Exception $ex) {
+                return ['data' => []];
+            }
         }, function () {
             return $this->returnBadRequest();
         });
@@ -302,7 +322,7 @@ class GeoRestController extends BaseController {
         $sql = <<<EOD
             SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
             FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE typename = ? order by display_order
+            WHERE lower(typename) = lower(?) order by display_order
         EOD;
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return [
