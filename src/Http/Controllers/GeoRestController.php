@@ -8,6 +8,7 @@ use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\ObjectsRecoveryRepository
 use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
 use BecaGIS\LaravelGeoserver\Http\Repositories\PermRepositry;
 use BecaGIS\LaravelGeoserver\Http\Repositories\ResourceBaseRepository;
+use BecaGIS\LaravelGeoserver\Http\Repositories\WfsRepository;
 use BecaGIS\LaravelGeoserver\Http\Resources\WfsTransaction;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
@@ -59,6 +60,9 @@ class GeoRestController extends BaseController {
         $layers = $request->get('layers', null);
         $tablePrefix = $this->getWorkSpace();
 
+        $tables = WfsRepository::instance()->getTableNamesByFeatureTypes(explode(',', $layers));
+        $layers = implode(',', $tables);
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features?tablePrefix=$tablePrefix";
         $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
@@ -80,6 +84,7 @@ class GeoRestController extends BaseController {
             $userId = $user->provider_id;
 
             $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
+            $listLayersCanAccess = WfsRepository::instance()->getTableNamesByFeatureTypes($listLayersCanAccess);
             $layers = implode(',', $listLayersCanAccess);
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
@@ -120,14 +125,13 @@ class GeoRestController extends BaseController {
         }
 
         $layers = $request->get('layers', null);
-
         $user = FacadesGeoNode::user();
-        if ($user == null) {
-            return $this->returnBadRequest();
+        $userId = -1;
+        if ($user != null) {
+            $userId = $user->provider_id;
         }
-        $userId = $user->provider_id;
         $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
-
+        $listLayersCanAccess = WfsRepository::instance()->getTableNamesByFeatureTypes($listLayersCanAccess);
         $layers = implode(',', $listLayersCanAccess);
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
@@ -142,7 +146,6 @@ class GeoRestController extends BaseController {
                 } else {
                     return $data;
                 }
-
             },
             function() {
                 return $this->returnBadRequest();

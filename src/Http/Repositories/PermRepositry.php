@@ -32,7 +32,8 @@ class PermRepositry {
             $res = [];
             $listTypeName = is_string($listTypeName) ? explode(',', $listTypeName) : $listTypeName;
             foreach ($listTypeName as $typename) {
-                if (in_array($typename, $permLayers) || in_array("geonode:$typename", $permLayers)) {
+                $lower = strtolower($typename);
+                if (in_array($typename, $permLayers) || in_array("geonode:$lower", $permLayers)) {
                     array_push($res, $typename);
                 }
             } 
