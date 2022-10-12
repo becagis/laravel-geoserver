@@ -30,6 +30,7 @@ class GeoFeatureRepository
 
     public function get($typeName, $fid)
     {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function ($accessToken) use ($typeName, $fid) {
             $successCallback = function ($data) use ($typeName) {
                 try {
@@ -55,6 +56,7 @@ class GeoFeatureRepository
 
     public function store($typeName, $data)
     {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function ($accessToken) use ($data, $typeName) {
             $data = $this->removePrimaryKey($data);
             if (empty($data)) {

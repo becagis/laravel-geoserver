@@ -154,6 +154,7 @@ class GeoRestController extends BaseController {
     }
 
     public function list(Request $request, $typeName) {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
             $validator = Validator::make($request->all(), [
                 'page' => 'integer',
@@ -215,6 +216,7 @@ class GeoRestController extends BaseController {
     }
 
     public function update(Request $request, $typeName, $fid) {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             $data = $request->post();
             $data = $this->removePrimaryKey($data);
@@ -252,6 +254,7 @@ class GeoRestController extends BaseController {
     }
 
     public function delete(Request $request, $typeName, $fid) {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
@@ -275,6 +278,7 @@ class GeoRestController extends BaseController {
     }
 
     public function getters(Request $request, $typeName, $getter) {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $getter) {
             return match ($getter) {
                 'attribute_set' => $this->gettersAttributeSet($typeName),
@@ -285,6 +289,7 @@ class GeoRestController extends BaseController {
     }
 
     public function actions(Request $request, $typeName, $action) {
+        $typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $action) {
             return match ($action) {
                 // ?id=objectRecoveryId
@@ -295,6 +300,7 @@ class GeoRestController extends BaseController {
     }
 
     public function gettersAttributeSet($typeName) {
+        $typeName = strtolower($typeName);
         $sql = <<<EOD
             SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
             FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
@@ -307,6 +313,7 @@ class GeoRestController extends BaseController {
     }
 
     public function gettersTrash($typeName) {
+        $typeName = strtolower($typeName);
         $data = ObjectsRecoveryRepositoryFacade::list($typeName);
         return [
             'data' => $data
