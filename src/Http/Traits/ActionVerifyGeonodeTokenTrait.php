@@ -15,4 +15,13 @@ trait ActionVerifyGeonodeTokenTrait {
             return $this->returnBadRequest("Không có quyền truy cập");
         }
     }
+
+    protected function actionVerifyGeonodeTokenAllowNone($successCallback) {
+        $accessToken = request('accessToken', null);
+        $accessToken = $accessToken?? GeoNode::getAccessToken();
+        if (!isset($accessToken)) {
+            $accessToken = '';
+        }
+        return $successCallback($accessToken);
+    }
 }   

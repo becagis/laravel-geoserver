@@ -31,7 +31,7 @@ class GeoFeatureRepository
     public function get($typeName, $fid)
     {
         $typeName = strtolower($typeName);
-        return $this->actionVerifyGeonodeToken(function ($accessToken) use ($typeName, $fid) {
+        return $this->actionVerifyGeonodeTokenAllowNone(function ($accessToken) use ($typeName, $fid) {
             $successCallback = function ($data) use ($typeName) {
                 try {
                     return $this->getRestData($typeName, $data)[0];

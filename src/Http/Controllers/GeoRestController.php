@@ -279,13 +279,11 @@ class GeoRestController extends BaseController {
 
     public function getters(Request $request, $typeName, $getter) {
         $typeName = strtolower($typeName);
-        return $this->actionVerifyGeonodeToken(function ($accessToken) use($request, $typeName, $getter) {
-            return match ($getter) {
-                'attribute_set' => $this->gettersAttributeSet($typeName),
-                'trash' => $this->gettersTrash($typeName),
-                default => $this->returnBadRequest()
-            };
-        });
+        return match ($getter) {
+            'attribute_set' => $this->gettersAttributeSet($typeName),
+            'trash' => $this->gettersTrash($typeName),
+            default => $this->returnBadRequest()
+        };
     }
 
     public function actions(Request $request, $typeName, $action) {
