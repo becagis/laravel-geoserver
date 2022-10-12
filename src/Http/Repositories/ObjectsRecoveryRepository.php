@@ -39,7 +39,6 @@ class ObjectsRecoveryRepository {
             $objRecovery = ObjectsRecoveryModel::find($objectRecoveryId);
             $typename = $objRecovery->object_type;
             $data = json_decode($objRecovery->data, true);
-
             GeoFeatureRepositoryFacade::store($typename, $data);
 
             $objRecovery->restored_at = new DateTime();

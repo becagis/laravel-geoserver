@@ -29,7 +29,7 @@ class ResourceBaseRepository {
             return $res;
         };
         $failCall = function() use($http){
-            dd($http);
+            return [];
         };
         return $this->handleHttpRequest($http, $successCall, $failCall);
     }

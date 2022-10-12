@@ -327,7 +327,6 @@ class GeoRestController extends BaseController {
             ObjectsRecoveryRepositoryFacade::restoreRecoveryToGeoDbFeature($id);
             return $this->returnOK();
         } else {
-            dd($id);
             return $this->returnBadRequest();
         }
     }

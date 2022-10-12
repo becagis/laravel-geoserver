@@ -64,7 +64,6 @@ class GeoFeatureRepository
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
-            //dd($apiUrl);
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [
                 'body' => $xml
             ]);
@@ -77,7 +76,8 @@ class GeoFeatureRepository
                     }
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
                     if ($fid != null && sizeof(explode('.', $fid)) > 1) {
-                        return $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
+                        $res = $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
+                        return $res;
                     } else {
                         return $this->returnBadRequest();
                     }
