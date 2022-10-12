@@ -174,7 +174,7 @@ class GeoRestController extends BaseController {
     }
 
     public function list(Request $request, $typeName) {
-        $typeName = strtolower($typeName);
+        //$typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName) {
             $validator = Validator::make($request->all(), [
                 'page' => 'integer',
