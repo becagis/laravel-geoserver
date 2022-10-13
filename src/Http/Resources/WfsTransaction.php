@@ -105,6 +105,7 @@ class WfsTransaction {
     // exp: addCreateProps([name => value]) : [matdo => 1, dientich=>2]
     public function addCreateProps($mapPropValue) { 
         foreach($mapPropValue as $name => $value) {
+            $value = $value ?? "0";
             $this->addCreateProp($name, $value);
         }
         
@@ -113,6 +114,7 @@ class WfsTransaction {
 
     // exp: addUpdateProp(name: 'matdo', value: '')
     public function addUpdateProp($name, $value) {
+        $value = $value ?? "0";
         if (in_array($name, $this->geomProps)) {
             $this->addUpdateGeoJson($name, $value);
         } else {

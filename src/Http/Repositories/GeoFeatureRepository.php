@@ -66,7 +66,8 @@ class GeoFeatureRepository
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [
                 'body' => $xml
             ]);
-
+            //dd($xml);
+            
             return $this->handleHttpRequestRaw($response, function ($rd) use ($typeName, $data) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());

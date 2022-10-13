@@ -236,7 +236,7 @@ class GeoRestController extends BaseController {
     }
 
     public function update(Request $request, $typeName, $fid) {
-        $typeName = strtolower($typeName);
+        //$typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             $data = $request->post();
             $data = $this->removePrimaryKey($data);
@@ -274,7 +274,7 @@ class GeoRestController extends BaseController {
     }
 
     public function delete(Request $request, $typeName, $fid) {
-        $typeName = strtolower($typeName);
+        //$typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
             $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
@@ -298,7 +298,7 @@ class GeoRestController extends BaseController {
     }
 
     public function getters(Request $request, $typeName, $getter) {
-        $typeName = strtolower($typeName);
+        //$typeName = strtolower($typeName);
         return match ($getter) {
             'attribute_set' => $this->gettersAttributeSet($typeName),
             'trash' => $this->gettersTrash($typeName),
@@ -331,7 +331,7 @@ class GeoRestController extends BaseController {
     }
 
     public function gettersTrash($typeName) {
-        $typeName = strtolower($typeName);
+        //$typeName = strtolower($typeName);
         $data = ObjectsRecoveryRepositoryFacade::list($typeName);
         return [
             'data' => $data
