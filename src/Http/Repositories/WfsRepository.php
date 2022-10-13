@@ -15,10 +15,13 @@ class WfsRepository {
     HandleHttpRequestTrait,
     XmlConvertTrait;
 
-    protected static $instance;
-    protected $cacheMapFeatureTypeToTableName = null;
+    protected static $ins;
+    protected $cacheMapFeatureTypeToTableName;
     public static function instance() {
-        return new WfsRepository();
+        if (!isset(self::$ins)) {
+            self::$ins = new WfsRepository();
+        } 
+        return self::$ins;
     }
 
     public function getMapTableNameToFeatureType() {
@@ -95,6 +98,31 @@ class WfsRepository {
             return $tables;
         } catch (Exception $ex) {
             return $featureTypes;
-        }
+        }   
     }
+
+    public function getTableNamesMapByFeatureTypes($featureTypes) {
+        try {
+            $mapFeatureTypes = $this->getMapFeatureTypeToTableName();
+            $tables = [];
+            foreach ($featureTypes as $featureType) {
+                $name = $featureType;
+                $split = explode(':', $name);
+                if (sizeof($split) == 2) {
+                    $name = $split[1];
+                }
+                $lower = $name;
+                if (isset($mapFeatureTypes[$lower])) {
+                    $tables[$mapFeatureTypes[$lower]] = $lower;
+                } else {
+                    $tables[$mapFeatureTypes[$featureType]] = $featureType;
+                }
+            }
+            return $tables;
+        } catch (Exception $ex) {
+            return $featureTypes;
+        }   
+    }
+
+    
 }

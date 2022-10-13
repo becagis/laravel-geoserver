@@ -60,19 +60,21 @@ class GeoRestController extends BaseController {
         $layers = $request->get('layers', null);
         $tablePrefix = $this->getWorkSpace();
 
-        $tables = WfsRepository::instance()->getTableNamesByFeatureTypes(explode(',', $layers));
-        $layers = implode(',', $tables);
+        $featureTypes = explode(',', $layers);
+        $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($featureTypes);
+        $layers = implode(',', array_keys($tables));
 
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features?tablePrefix=$tablePrefix";
         $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
         $http = Http::get($baseUrl);
-        return $this->handleHttpRequest($http, function($data) {
+        return $this->handleHttpRequest($http, function($data) use($featureTypes, $tables, $tablePrefix) {
             try {
-                $mapTables = WfsRepository::instance()->getMapTableNameToFeatureType();
+                $mapTables = $tables;
                 $items = $data["data"];
+                //dd($items);
                 foreach ($items as $idx => $item) {
-                    $prefix = "";
+                    $prefix = $tablePrefix;
                     $name = $item["name"];
                     $split = explode(":", $name);
                     if (sizeof($split) == 2) {
@@ -85,7 +87,7 @@ class GeoRestController extends BaseController {
                     $items[$idx] = $item;
                 }
                 $data['data'] = $items;
-                return $data;
+                return $data;   
             } catch (Exception $ex) {
                 return ['data' => []];
             }
@@ -106,6 +108,7 @@ class GeoRestController extends BaseController {
             $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
             $listLayersCanAccess = WfsRepository::instance()->getTableNamesByFeatureTypes($listLayersCanAccess);
             $layers = implode(',', $listLayersCanAccess);
+
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
@@ -153,6 +156,7 @@ class GeoRestController extends BaseController {
         $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
         $listLayersCanAccess = WfsRepository::instance()->getTableNamesByFeatureTypes($listLayersCanAccess);
         $layers = implode(',', $listLayersCanAccess);
+        
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
         $url = "{$baseUrl}?type={$type}" . ($layers == null ? '' : "&layers=$layers");
