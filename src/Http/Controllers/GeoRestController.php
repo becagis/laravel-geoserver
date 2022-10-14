@@ -204,7 +204,8 @@ class GeoRestController extends BaseController {
 
             $cql_filter = $validated['cql_filter']?? '';
             if (!empty($cql_filter)) {
-                $url .= "&cql_filter={$cql_filter}";
+                $cql_filter_encoded = urlencode($cql_filter);
+                $url .= "&cql_filter={$cql_filter_encoded}";
             }
 
             $response =  Http::get($url);
