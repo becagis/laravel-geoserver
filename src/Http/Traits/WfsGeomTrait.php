@@ -20,7 +20,7 @@ trait WfsGeomTrait
                     <gml:MultiLineString srsName="EPSG:4326">
                         <gml:lineStringMember>
                             <gml:LineString srsName="EPSG:4326">
-                                <gml:posList>{$geom->value}</gml:posList>
+                                <gml:coordinates>{$geom->value}</gml:coordinates>
                             </gml:LineString>
                         </gml:lineStringMember>
                     </gml:MultiLineString>
@@ -31,7 +31,7 @@ trait WfsGeomTrait
     {
         return <<<EOD
             <gml:LineString srsName="EPSG:4326">
-                <gml:posList>{$geom->value}</gml:posList>
+                <gml:coordinates>{$geom->value}</gml:coordinates>
             </gml:LineString>
         EOD;
     }
