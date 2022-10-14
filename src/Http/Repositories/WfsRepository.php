@@ -91,8 +91,6 @@ class WfsRepository {
                 $lower = strtolower($name);
                 if (isset($mapFeatureTypes[$lower])) {
                     array_push($tables, $mapFeatureTypes[$lower]);
-                } else {
-                    array_push($tables, $featureType);
                 }
             }
             return $tables;
