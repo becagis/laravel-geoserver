@@ -113,7 +113,17 @@ class GeoRestController extends BaseController {
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 
             $http = Http::get($baseUrl);
-            return $this->handleHttpRequest($http, function($data) {
+            return $this->handleHttpRequest($http, function($data) use ($tables) {
+                $mapTables = $tables;
+                $items = $data["data"];
+                foreach ($items as $idx => $item) {
+                    $name = $item["typeName"];
+                    if (isset($mapTables[$name])) {
+                        $item["typeName"] = $mapTables[$name];
+                    }
+                    $items[$idx] = $item;
+                }
+                $data['data'] = $items;
                 return $data;
             }, function () {
                 return $this->returnBadRequest();
