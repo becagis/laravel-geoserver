@@ -6,6 +6,7 @@ use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
 use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\GeoFeatureRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\ObjectsRecoveryRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
+use BecaGIS\LaravelGeoserver\Http\Repositories\LayersRepository;
 use BecaGIS\LaravelGeoserver\Http\Repositories\PermRepositry;
 use BecaGIS\LaravelGeoserver\Http\Repositories\ResourceBaseRepository;
 use BecaGIS\LaravelGeoserver\Http\Repositories\WfsRepository;
@@ -61,9 +62,9 @@ class GeoRestController extends BaseController {
         $tablePrefix = $this->getWorkSpace();
 
         $featureTypes = explode(',', $layers);
+        //dd(LayersRepository::instance()->filterLayersExistByTypeName($featureTypes));
         $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($featureTypes);
         $layers = implode(',', array_keys($tables));
-
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features?tablePrefix=$tablePrefix";
         $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 

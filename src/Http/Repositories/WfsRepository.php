@@ -113,7 +113,7 @@ class WfsRepository {
                 if (isset($mapFeatureTypes[$lower])) {
                     $tables[$mapFeatureTypes[$lower]] = $lower;
                 }
-            }
+            }   
             return $tables;
         } catch (Exception $ex) {
             return $featureTypes;
