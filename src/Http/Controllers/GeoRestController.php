@@ -72,7 +72,6 @@ class GeoRestController extends BaseController {
             try {
                 $mapTables = $tables;
                 $items = $data["data"];
-                //dd($items);
                 foreach ($items as $idx => $item) {
                     $prefix = $tablePrefix;
                     $name = $item["name"];
