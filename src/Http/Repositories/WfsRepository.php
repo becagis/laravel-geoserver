@@ -38,18 +38,37 @@ class WfsRepository {
         return $result;
     }
 
-    public function _getMapFeatureTypeToTableName() {
+    public function getMapFeatureTypeToTableName() {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
         }
         $accessToken = GeoNode::getAccessToken();
-        $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
-            'request' => 'GetFeatureType'
-        ])->url();
+        $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)
+                        ->removeParamKey("outputFormat")
+                        ->addParams([
+                            'request' => 'DescribeFeatureType'
+                        ])->url();
         $http = Http::get($url);
         return $this->handleHttpRequestRaw($http, function($rd) {
             try {
-                $mapTableName = [];                
+                $mapTableName = []; 
+                $json = $this->convertWfsXmlToObj($rd->body());
+                $elements = $json->element;
+                foreach($elements as $element) {
+                    $attributes = $element->attributes;
+                    $name = $attributes->name;
+                    $type = $attributes->type;
+                    $split = explode(':', $type);
+                    if (sizeof($split) == 2) {
+                        $type = $split[1];
+                        $substrcheck = strtolower(substr($type, strlen($type) - 4, 4));
+                        if ($substrcheck == 'type') {
+                            $type = substr($type, 0, strlen($type) - 4);
+                        }
+                    }
+                    $mapTableName[$type] = $name; 
+                }
+                $this->cacheMapFeatureTypeToTableName = $mapTableName;         
                 return $mapTableName;
             } catch (Exception $ex) {
                 return [];
@@ -57,7 +76,8 @@ class WfsRepository {
         });
     }
 
-    public function getMapFeatureTypeToTableName() {
+    public function _getMapFeatureTypeToTableName() {
+        //$this->_getMapFeatureTypeToTableName();
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
         }
@@ -89,7 +109,7 @@ class WfsRepository {
                         $mapTableName[$name] = $tableName; 
                     }
                 }
-                $this->cacheMapFeatureTypeToTableName = $mapTableName;
+                $this->cacheMapFeatureTypeToTableName = $mapTableName;    
                 return $mapTableName;
             } catch (Exception $ex) {
                 return [];

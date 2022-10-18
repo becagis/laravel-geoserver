@@ -3,7 +3,7 @@ namespace BecaGIS\LaravelGeoserver\Http\Traits;
 
 trait XmlConvertTrait {
     protected function convertWfsXmlToObj($wfsXml) {
-        $xmlRemoveChars = ['wfs:', 'ogc:', '@', 'ows:'];
+        $xmlRemoveChars = ['wfs:', 'ogc:', '@', 'ows:', 'xsd:'];
         foreach ($xmlRemoveChars as $char) {
             $wfsXml = str_replace($char, '', $wfsXml);
         }

@@ -48,6 +48,11 @@ class GeoServerUrlBuilder {
         return $this;
     }
 
+    public function removeParamKey($paramName) {
+        unset($this->params[$paramName]);
+        return $this;
+    }
+
     public function url() {
         $urlParams = $this->urlParams() . $this->paramsString;
         return "{$this->geoserverUrl}/ows?{$urlParams}";
