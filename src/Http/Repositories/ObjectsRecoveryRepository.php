@@ -20,7 +20,7 @@ class ObjectsRecoveryRepository {
                 $username = GeoNode::user() != null ? GeoNode::user()->username : '';
                 $data = [
                     'object_pk' => $idSplit[1],
-                    'object_type' => $obj_type,
+                    'object_type' => $typeName,
                     'created_at' => new DateTime(),
                     'object_db' => $this->DbGeonodeData,
                     'created_by' => $username,
@@ -47,7 +47,6 @@ class ObjectsRecoveryRepository {
             $objRecovery->status = ObjectsRecoveryModel::$STATUS_RESTORED;
             $objRecovery->save();
         } catch (Exception $ex) {
-            
         }
     }
 

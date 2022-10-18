@@ -26,7 +26,9 @@ class WfsTransaction {
 
     public function checkAttrIsInt($attributeName) {
         if (isset($this->attributeSetMap[$attributeName])) {
-            return $this->attributeSetMap[$attributeName] == "xsd:int";
+            return $this->attributeSetMap[$attributeName] == "xsd:int" ||
+            $this->attributeSetMap[$attributeName] == "xsd:float" ||
+            $this->attributeSetMap[$attributeName] == "xsd:double";
         }
         return true;
     }
@@ -99,8 +101,8 @@ class WfsTransaction {
 
     // exp: addCreateProp(name: 'matdo', value: '')
     public function addCreateProp($name, $value) {
-        if ($this->checkAttrIsInt($name) & !isset($value)) {
-            $value = '-9999';
+        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value = "")) {
+            return $this;
         }
         if (in_array($name, $this->geomProps)) {
             $this->addCreateGeoJson($name, $value);
@@ -127,8 +129,8 @@ class WfsTransaction {
 
     // exp: addUpdateProp(name: 'matdo', value: '')
     public function addUpdateProp($name, $value) {
-        if ($this->checkAttrIsInt($name) & !isset($value)) {
-            $value = '-9999';
+        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value = "")) {
+            $value = "-99999";
         }
 
         if (in_array($name, $this->geomProps)) {
