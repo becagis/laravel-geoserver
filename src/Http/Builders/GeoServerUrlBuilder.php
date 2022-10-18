@@ -12,6 +12,11 @@ class GeoServerUrlBuilder {
         return new GeoServerUrlBuilder(['access_token' => $accessToken]);
     }
 
+    public function urlRestFeatureType($featureType) {
+        $urlParams = $this->urlParams() . $this->paramsString;
+        return "{$this->geoserverUrl}/rest/workspaces/geonode/datastores/geoportal_data/featuretypes/{$featureType}.json?{$urlParams}";
+    }
+
     protected $params = [];
     protected $paramsString = "";
 

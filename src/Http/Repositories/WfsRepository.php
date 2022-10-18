@@ -38,6 +38,30 @@ class WfsRepository {
         return $result;
     }
 
+    public function verifyMissingFeatureTable($listMissingFeatureTable) {
+        $result = [];
+        foreach ($listMissingFeatureTable as $feature) {
+            try {
+                $accessToken = GeoNode::getAccessToken();
+                $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->urlRestFeatureType($feature);
+                $http = Http::get($url);
+                $nativeName = $this->handleHttpRequest($http, 
+                    function($data) {
+                        return data_get($data, 'featureType.nativeName', null);
+                    }, 
+                    function () {
+                        return null;
+                });
+                if (isset($nativeName)) {
+                    $result[$feature] = $nativeName;
+                }
+            } catch (Exception $ex) {
+                
+            }
+        } 
+        return $result;
+    }
+
     public function getMapFeatureTypeToTableName() {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
@@ -54,6 +78,7 @@ class WfsRepository {
                 $mapTableName = []; 
                 $json = $this->convertWfsXmlToObj($rd->body());
                 $elements = $json->element;
+                $types = [];
                 foreach($elements as $element) {
                     $attributes = $element->attributes;
                     $name = $attributes->name;
@@ -65,9 +90,10 @@ class WfsRepository {
                         if ($substrcheck == 'type') {
                             $type = substr($type, 0, strlen($type) - 4);
                         }
+                        array_push($types, $type);
                     }
-                    $mapTableName[$type] = $name; 
                 }
+                $mapTableName = $this->verifyMissingFeatureTable($types);
                 $this->cacheMapFeatureTypeToTableName = $mapTableName;         
                 return $mapTableName;
             } catch (Exception $ex) {
