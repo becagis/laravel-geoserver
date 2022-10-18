@@ -78,6 +78,31 @@ class PermRepositry {
         return $result;
     }
 
+    // resourceBasePtrId: mapId in geoportal_data.maps_map.
+    public function getCurrentPermsOnMap($resourceBasePtrId) {
+        $sql = <<<EOD
+            select base_resourcebase.owner_id, maps_map.resourcebase_ptr_id as layer_id, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+            from guardian_userobjectpermission
+            left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+            left join base_resourcebase on base_resourcebase.id = maps_map.resourcebase_ptr_id
+            left join guardian_groupobjectpermission 
+                ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
+            left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
+            left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
+            left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+            
+            where base_resourcebase.id = :resourceBasePtrId and (owner_id = :actorId or user_id = :actorId or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = :actorId) and model in ('resourcebase', 'map')
+        EOD;
+        $user = GeoNode::user();
+        $actorId = isset($user) ? $user->provider_id : -1;
+        $rows = $this->getDbConnection()->select($sql, [$resourceBasePtrId, $actorId]);
+        $result = [];
+        foreach ($rows as $row) {
+            array_push($result, $row->codename);
+        }
+        return $result;
+    }
+
     public function getLayersActorCanAccess($actorId, $actorType, $perms) {
         $sql = match ($actorType) {
             PermRepositry::ActorTypeGroup => $this->getSQLLayersByGroup(),

@@ -38,6 +38,25 @@ class WfsRepository {
         return $result;
     }
 
+    public function _getMapFeatureTypeToTableName() {
+        if (isset($this->cacheMapFeatureTypeToTableName)) {
+            return $this->cacheMapFeatureTypeToTableName;
+        }
+        $accessToken = GeoNode::getAccessToken();
+        $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
+            'request' => 'GetFeatureType'
+        ])->url();
+        $http = Http::get($url);
+        return $this->handleHttpRequestRaw($http, function($rd) {
+            try {
+                $mapTableName = [];                
+                return $mapTableName;
+            } catch (Exception $ex) {
+                return [];
+            }
+        });
+    }
+
     public function getMapFeatureTypeToTableName() {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
