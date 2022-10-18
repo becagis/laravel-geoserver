@@ -9,6 +9,7 @@ use BecaGIS\LaravelGeoserver\Http\Traits\ActionVerifyGeonodeTokenTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertGeoJsonToRestifyTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ConvertWfsTypeToLocalTypeTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\GeoFeatureTrait;
+use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\RemovePrimaryKeyFromDataUpdateTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
@@ -26,7 +27,8 @@ class GeoFeatureRepository
         ActionReturnStatusTrait,
         ConvertWfsTypeToLocalTypeTrait,
         XmlConvertTrait,
-        GeoFeatureTrait;
+        GeoFeatureTrait,
+        GeonodeDbTrait;
 
     public function get($typeName, $fid)
     {
@@ -86,5 +88,25 @@ class GeoFeatureRepository
                 }
             });
         });
+    }
+
+    public function getAttributeSet($typeName) {
+        $typeName = strtolower($typeName);
+        $sql = <<<EOD
+            SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
+            FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
+            WHERE lower(typename) = lower(?) order by display_order
+        EOD;
+        $rows = $this->getDbConnection()->select($sql, [$typeName]);
+        return $rows;
+    }
+
+    public function getAttributeSetMap($typeName) {
+        $attributeSet = $this->getAttributeSet($typeName);
+        $map = [];
+        foreach ($attributeSet as $attribute) {
+            $map[$attribute->attribute] = $attribute->attribute_type;
+        }
+        return $map;
     }
 }

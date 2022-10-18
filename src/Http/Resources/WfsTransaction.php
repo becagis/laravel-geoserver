@@ -1,6 +1,8 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Resources;
 
+use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\GeoFeatureRepositoryFacade;
+use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
 use BecaGIS\LaravelGeoserver\Http\Traits\WfsGeomTrait;
 use Exception;
 
@@ -8,7 +10,7 @@ class WfsTransaction {
     use WfsGeomTrait;
 
     protected $deletes, $updates, $creates, $updateGeoms, $createGeoms;
-    protected $typeName, $fid;
+    protected $typeName, $fid, $attributeSetMap;
     protected $geomProps = ["geom", "geometry", "the_geom"];
 
     // exp: build('genode:qhpksdd_quan12', 'qhpksdd_quan12.1')
@@ -17,7 +19,16 @@ class WfsTransaction {
         $wfsTransaction->typeName = $typeName;
         $wfsTransaction->fid = $fid;
 
+        $wfsTransaction->attributeSetMap = GeoFeatureRepositoryFacade::getAttributeSetMap($typeName);
+
         return $wfsTransaction;
+    }
+
+    public function checkAttrIsInt($attributeName) {
+        if (isset($this->attributeSetMap[$attributeName])) {
+            return $this->attributeSetMap[$attributeName] == "xsd:int";
+        }
+        return true;
     }
 
     public function __construct() {
@@ -88,6 +99,9 @@ class WfsTransaction {
 
     // exp: addCreateProp(name: 'matdo', value: '')
     public function addCreateProp($name, $value) {
+        if ($this->checkAttrIsInt($name) & !isset($value)) {
+            $value = '-9999';
+        }
         if (in_array($name, $this->geomProps)) {
             $this->addCreateGeoJson($name, $value);
         } else {
@@ -105,9 +119,7 @@ class WfsTransaction {
     // exp: addCreateProps([name => value]) : [matdo => 1, dientich=>2]
     public function addCreateProps($mapPropValue) { 
         foreach($mapPropValue as $name => $value) {
-            if (isset($value)) {
-                $this->addCreateProp($name, $value);
-            }
+            $this->addCreateProp($name, $value);
         }
         
         return $this;
@@ -115,17 +127,19 @@ class WfsTransaction {
 
     // exp: addUpdateProp(name: 'matdo', value: '')
     public function addUpdateProp($name, $value) {
-        if (isset($value)) {
-            if (in_array($name, $this->geomProps)) {
-                $this->addUpdateGeoJson($name, $value);
-            } else {
-                array_push($this->updates, (object)[
-                    'typeName' => $this->typeName,
-                    'fid' => $this->fid,
-                    'name' => $name,
-                    'value' => $value
-                ]);
-            }
+        if ($this->checkAttrIsInt($name) & !isset($value)) {
+            $value = '-9999';
+        }
+
+        if (in_array($name, $this->geomProps)) {
+            $this->addUpdateGeoJson($name, $value);
+        } else {
+            array_push($this->updates, (object)[
+                'typeName' => $this->typeName,
+                'fid' => $this->fid,
+                'name' => $name,
+                'value' => $value
+            ]);
         }
         return $this;
     }
