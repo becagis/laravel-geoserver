@@ -113,7 +113,7 @@ class WfsTransaction {
                 'name' => $name,
                 'value' => $value
             ]);
-        }
+        } 
 
         return $this;
     }
