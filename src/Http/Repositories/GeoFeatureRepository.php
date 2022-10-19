@@ -64,12 +64,12 @@ class GeoFeatureRepository
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
+
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [
                 'body' => $xml
             ]);
-            //dd($xml);
-            
+
             return $this->handleHttpRequestRaw($response, function ($rd) use ($typeName, $data) {
                 try {
                     $xmlJson = $this->convertWfsXmlToObj($rd->body());
@@ -91,11 +91,10 @@ class GeoFeatureRepository
     }
 
     public function getAttributeSet($typeName) {
-        $typeName = strtolower($typeName);
         $sql = <<<EOD
             SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
             FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE lower(typename) = lower(?) order by display_order
+            WHERE typename = ? order by display_order
         EOD;
         $rows = $this->getDbConnection()->select($sql, [$typeName]);
         return $rows;

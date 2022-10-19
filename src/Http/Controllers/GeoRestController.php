@@ -86,7 +86,7 @@ class GeoRestController extends BaseController {
                     $items[$idx] = $item;
                 }
                 $data['data'] = $items;
-                return $data;   
+                return $data;
             } catch (Exception $ex) {
                 return ['data' => []];
             }
@@ -166,7 +166,7 @@ class GeoRestController extends BaseController {
         $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
         $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($listLayersCanAccess);
         $layers = implode(',', array_keys($tables));
-        
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/geom-in-circle-counter";
 
         $url = "{$baseUrl}?type={$type}" . ($layers == null ? '' : "&layers=$layers");
@@ -333,13 +333,7 @@ class GeoRestController extends BaseController {
     }
 
     public function gettersAttributeSet($typeName) {
-        $typeName = strtolower($typeName);
-        $sql = <<<EOD
-            SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
-            FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE lower(typename) = lower(?) order by display_order
-        EOD;
-        $rows = $this->getDbConnection()->select($sql, [$typeName]);
+        $rows = GeoFeatureRepositoryFacade::getAttributeSet($typeName);
         return [
             'data' => $rows
         ];

@@ -76,7 +76,7 @@ class WfsTransaction {
         }
         return null;
     }
-    
+
 
     // $geojson -> json_decoded;return posList or pos String. "long lat long lat ...."
     protected function extractCoordinatesFromGeoJson($geojson) {
@@ -101,7 +101,7 @@ class WfsTransaction {
 
     // exp: addCreateProp(name: 'matdo', value: '')
     public function addCreateProp($name, $value) {
-        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value = "")) {
+        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value == "")) {
             return $this;
         }
         if (in_array($name, $this->geomProps)) {
@@ -113,23 +113,23 @@ class WfsTransaction {
                 'name' => $name,
                 'value' => $value
             ]);
-        } 
+        }
 
         return $this;
     }
 
     // exp: addCreateProps([name => value]) : [matdo => 1, dientich=>2]
-    public function addCreateProps($mapPropValue) { 
+    public function addCreateProps($mapPropValue) {
         foreach($mapPropValue as $name => $value) {
             $this->addCreateProp($name, $value);
         }
-        
+
         return $this;
     }
 
     // exp: addUpdateProp(name: 'matdo', value: '')
     public function addUpdateProp($name, $value) {
-        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value = "")) {
+        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value == "")) {
             $value = "-99999";
         }
 
@@ -147,15 +147,15 @@ class WfsTransaction {
     }
 
     // exp: addUpdateProps([name => value]) : [matdo => 1, dientich=>2]
-    public function addUpdateProps($mapPropValue) { 
+    public function addUpdateProps($mapPropValue) {
         foreach($mapPropValue as $name => $value) {
             $this->addUpdateProp($name, $value);
         }
-        
+
         return $this;
     }
 
-    
+
     public function addDelete() {
         array_push($this->deletes, (object)[
             'typeName' => $this->typeName,
@@ -179,7 +179,7 @@ class WfsTransaction {
             $result .= "</wfs:Insert>";
         }
         return $result;
-    }   
+    }
 
     protected function buildUpdates() {
         $result = "";
