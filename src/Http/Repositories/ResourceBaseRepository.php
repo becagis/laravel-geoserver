@@ -22,13 +22,28 @@ class ResourceBaseRepository {
     public function creatMapResource($params) {
         $url = config('geonode.url');
         $accessToken = GeoNode::getAccessToken();
-        $url = "$url/mapstore/rest/resources/?full=true&token=$accessToken";
+        $url = "$url/mapstore/rest/resources/?full=true&access_token=$accessToken";
         $json = MapstoreMapJsonBuilder::build()->setParams($params)->json();
         $http = Http::withToken($accessToken)->withBody($json, 'application/json')->post($url);
         $successCall = function($res) {
             return $res;
         };
         $failCall = function() use($http){
+            return [];
+        };
+        return $this->handleHttpRequest($http, $successCall, $failCall);
+    }
+
+    public function deleteMapResource($resourceBasePtrId) {
+        $url = config('geonode.url');
+        $accessToken = GeoNode::getAccessToken();
+        $url = "$url/api/v2/resources/{$resourceBasePtrId}/?access_token=$accessToken";
+        $http = Http::withToken($accessToken)->delete($url);
+        $successCall = function($res) {
+            return $res;
+        };
+        $failCall = function() use($http){
+            dd($http);
             return [];
         };
         return $this->handleHttpRequest($http, $successCall, $failCall);
