@@ -59,12 +59,11 @@ class GeoFeatureRepository
     {
         //$typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function ($accessToken) use ($data, $typeName) {
-            $data = $this->removePrimaryKey($data);
+            $data = $this->removePrimaryKeyOfTypeName($typeName, $data);
             if (empty($data)) {
                 return $this->returnBadRequest();
             }
             $xml = WfsTransaction::build($typeName, 0)->addCreateProps($data)->xml();
-
             $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
             $response = Http::contentType('text/plain')->send('POST', $apiUrl, [
                 'body' => $xml

@@ -43,7 +43,6 @@ class ResourceBaseRepository {
             return $res;
         };
         $failCall = function() use($http){
-            dd($http);
             return [];
         };
         return $this->handleHttpRequest($http, $successCall, $failCall);
@@ -61,6 +60,28 @@ class ResourceBaseRepository {
         try {
             $tablename = explode(':', $typeName)[1];
             $rows = $this->getDbShpConnection()->select($sql, [$tablename]);
+            return $rows[0]->column_name;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public function getPkColumnNameOfTypeName($typeName) {
+        $sql = <<<EOD
+            select column_name from information_schema.table_constraints tco
+            join information_schema.key_column_usage kcu 
+                on kcu.constraint_name = tco.constraint_name
+                and kcu.constraint_schema = tco.constraint_schema
+                and kcu.constraint_name = tco.constraint_name
+            where tco.constraint_type = 'PRIMARY KEY' and tco.table_name=?
+        EOD;
+        try {
+            $mapTypeName = WfsRepository::instance()->getMapFeatureTypeToTableName();
+            
+            $names = explode(':', $typeName);
+            $typeName = sizeof($names) > 1 ? $names[1] : $names[0];
+            $table = $mapTypeName[$typeName];
+            $rows = $this->getDbShpConnection()->select($sql, [$table]);
             return $rows[0]->column_name;
         } catch (Exception $ex) {
             return null;

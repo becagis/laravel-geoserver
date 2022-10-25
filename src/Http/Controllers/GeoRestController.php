@@ -205,7 +205,7 @@ class GeoRestController extends BaseController {
                 'count' => $perPage,
                 'startIndex' => $startIndex
             ];
-            $pkCol = ResourceBaseRepository::instance()->getPkColumnName($typeName);
+            $pkCol = ResourceBaseRepository::instance()->getPkColumnNameOfTypeName($typeName);
             if (isset($pkCol)) {
                 $params['sortBy'] = "$pkCol D";
             }
@@ -254,7 +254,7 @@ class GeoRestController extends BaseController {
         //$typeName = strtolower($typeName);
         return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
             $data = $request->post();
-            $data = $this->removePrimaryKey($data);
+            $data = $this->removePrimaryKeyOfTypeName($typeName, $data);
             if (empty($data)) {
                 return $this->returnBadRequest();
             }
@@ -334,7 +334,10 @@ class GeoRestController extends BaseController {
 
     public function gettersAttributeSet($typeName) {
         $rows = GeoFeatureRepositoryFacade::getAttributeSet($typeName);
-        return [
+        return [    
+            'meta' => [
+                'primary_key' => ResourceBaseRepository::instance()->getPkColumnNameOfTypeName($typeName)
+            ],
             'data' => $rows
         ];
     }
