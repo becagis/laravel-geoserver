@@ -57,7 +57,8 @@ class PermRepositry {
             'view_resourcebase',
             'change_resourcebase',
             'delete_resourcebase',
-            'change_resourcebase_permissions'
+            'change_resourcebase_permissions',
+            'change_layer_data'
         ];
     }
 
