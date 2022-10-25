@@ -3,6 +3,7 @@ namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 
 use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
 use BecaGIS\LaravelGeoserver\Http\Builders\MapstoreMapJsonBuilder;
+use BecaGIS\LaravelGeoserver\Http\Models\GeonodeTypeNameTableModel;
 use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
@@ -40,23 +41,29 @@ class WfsRepository {
 
     public function verifyMissingFeatureTable($listMissingFeatureTable) {
         $result = [];
+        $cachedFeatureTables = GeonodeTypeNameTableRepository::instance()->getMapFeatureTypeTable();
         foreach ($listMissingFeatureTable as $feature) {
-            try {
-                $accessToken = GeoNode::getAccessToken();
-                $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->urlRestFeatureType($feature);
-                $http = Http::get($url);
-                $nativeName = $this->handleHttpRequest($http, 
-                    function($data) {
-                        return data_get($data, 'featureType.nativeName', null);
-                    }, 
-                    function () {
-                        return null;
-                });
-                if (isset($nativeName)) {
-                    $result[$feature] = $nativeName;
+            if (isset($cachedFeatureTables[$feature])) {
+                $result[$feature] = $cachedFeatureTables[$feature];
+            } else {
+                try {
+                    $accessToken = GeoNode::getAccessToken();
+                    $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->urlRestFeatureType($feature);
+                    $http = Http::get($url);
+                    $nativeName = $this->handleHttpRequest($http, 
+                        function($data) {
+                            return data_get($data, 'featureType.nativeName', null);
+                        }, 
+                        function () {
+                            return null;
+                    });
+                    if (isset($nativeName)) {
+                        GeonodeTypeNameTableRepository::instance()->storeCache($feature, $nativeName);
+                        $result[$feature] = $nativeName;
+                    }
+                } catch (Exception $ex) {
+                    
                 }
-            } catch (Exception $ex) {
-                
             }
         } 
         return $result;
