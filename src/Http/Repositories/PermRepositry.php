@@ -40,12 +40,33 @@ class PermRepositry {
         }
     }
 
+    public function isAdmin($actorId) {
+        try {
+            $sql = <<<EOD
+            select * from people_profile where id = :actorId and is_superuser
+            EOD;
+            $rows = $this->getDbConnection()->select($sql, [$actorId]);
+            return isset($rows) && sizeof($rows);
+        } catch (Exception $ex) {
+            return false;
+        }
+    }
+
+    public function getPermsOfAdminOrOwner() {
+        return [
+            'view_resourcebase',
+            'change_resourcebase',
+            'delete_resourcebase',
+            'change_resourcebase_permissions'
+        ];
+    }
+
     // actoryType: group/user, $unitType: layer/map
     public function getActorPermsOnUnit($actorId, $actorType, $unitType) {
         $sql = <<<EOD
-            select layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+            select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
             from guardian_userobjectpermission
-            
+            left join base_resourcebase on base_resourcebase.id::text = guardian_userobjectpermission.object_pk
             left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
             left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
             left join guardian_groupobjectpermission 
@@ -60,6 +81,7 @@ class PermRepositry {
         $result = [];
         $pk = $unitType . "_id";
         $typenameCol = $unitType . "_typename";
+        $isAdmin =  $this->isAdmin($actorId);
         foreach ($rows as $row) {
             $id = $row->$pk;
             if (isset($id) && !empty($id)) {
@@ -71,8 +93,12 @@ class PermRepositry {
                         'perms' => []
                     ];
                 }
-    
-                array_push($result[$id]['perms'], $row->codename);
+                if ($row->owner_id == $actorId || $isAdmin) {
+                    $result[$id]['perms'] = array_merge($result[$id]['perms'], $this->getPermsOfAdminOrOwner());
+                } else {
+                    array_push($result[$id]['perms'], $row->codename);
+                }
+                $result[$id]['perms'] = array_unique($result[$id]['perms']);
             }
         }
         return $result;
@@ -95,11 +121,17 @@ class PermRepositry {
         EOD;
         $user = GeoNode::user();
         $actorId = isset($user) ? $user->provider_id : -1;
+        $isAdmin = $this->isAdmin($actorId);
         $rows = $this->getDbConnection()->select($sql, [$resourceBasePtrId, $actorId]);
         $result = [];
         foreach ($rows as $row) {
-            array_push($result, $row->codename);
+            if ($row->owner_id == $actorId || $isAdmin) {
+                $result = array_merge($result, $this->getPermsOfAdminOrOwner());
+            } else {
+                array_push($result, $row->codename);
+            }
         }
+        $result = array_unique($result);
         return $result;
     }
 
