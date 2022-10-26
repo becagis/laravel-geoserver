@@ -18,6 +18,14 @@ class ResourceBaseRepository {
         }
         return $instance;
     }
+
+    public function getUUIDByLayerTypeName($typename) {
+        $sql = <<<EOD
+            select * from base_resourcebase where id in (select resourcebase_ptr_id from layers_layer where typename = :typename)
+        EOD;
+        $rows = $this->getDbConnection()->select($sql, [$typename]);
+        return sizeof($rows) > 0 ? $rows[0]->uuid : null;
+    }
     // $params => [name, center: [x,y,crs], projection: 'EPSG:4326', layers: []]
     public function creatMapResource($params) {
         $url = config('geonode.url');

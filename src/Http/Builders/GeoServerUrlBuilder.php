@@ -18,12 +18,13 @@ class GeoServerUrlBuilder {
         return "{$this->geoserverUrl}/rest/workspaces/geonode/datastores/geoportal_data/featuretypes/{$featureType}.json?{$urlParams}";
     }
 
-    protected function createUrlGeoFencInvalidateCache() {
-        return "{$this->geoserverUrl}/rest/ruleCache/invalidate";
+    public function createUrlGeoFencInvalidateCache($uuid) {
+        $geonodeUrl = config("geonode.url");
+        return "{$geonodeUrl}/api/becagis/syncpermission/?uuid=$uuid";
     }
 
     protected function invalidateCache() {
-       //Http::get($this->createUrlGeoFencInvalidateCache());
+       Http::get($this->createUrlGeoFencInvalidateCache());
     }
 
     public function prepareTransactions() {

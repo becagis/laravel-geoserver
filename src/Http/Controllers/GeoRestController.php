@@ -217,7 +217,7 @@ class GeoRestController extends BaseController {
                 $cql_filter_encoded = urlencode($cql_filter);
                 $url .= "&cql_filter={$cql_filter_encoded}";
             }
-            GeoServerUrlBuilder::build()->prepareTransactions();
+            
             $response =  Http::get($url);
             return $this->handleHttpRequest($response,
                 // success callback
