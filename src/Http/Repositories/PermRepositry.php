@@ -64,21 +64,48 @@ class PermRepositry {
 
     // actoryType: group/user, $unitType: layer/map
     public function getActorPermsOnUnit($actorId, $actorType, $unitType) {
-        $sql = <<<EOD
-            select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
-            from guardian_userobjectpermission
-            left join base_resourcebase on base_resourcebase.id::text = guardian_userobjectpermission.object_pk
-            left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
-            left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
-            left join guardian_groupobjectpermission 
-                ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
-            left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
-            left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
-            left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+        // $sql = <<<EOD
+        //     select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+        //     from guardian_userobjectpermission
+        //     left join base_resourcebase on base_resourcebase.id::text = guardian_userobjectpermission.object_pk
+        //     left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+        //     left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+        //     left join guardian_groupobjectpermission 
+        //         ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
+        //     left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
+        //     left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
+        //     left join django_content_type ON django_content_type.id = auth_permission.content_type_id
             
-            where (user_id = ? or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = ?) and model in ('resourcebase', ?)
+        //     where (user_id = ? or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = ?) and model in ('resourcebase', ?)
+        // EOD;
+        $sql = <<<EOD
+                select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+                from guardian_userobjectpermission
+                left join base_resourcebase on base_resourcebase.id::text = guardian_userobjectpermission.object_pk
+                left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+                left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+                left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
+                left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+                
+                where (user_id = :actorId or user_id = -1  or 1000 = :actorId) and model in ('resourcebase', :unitType)
+                
+                union
+                
+                select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+                from (
+                    select * from guardian_groupobjectpermission 
+                    where group_id in (select group_id from people_profile_groups where profile_id = :actorId)
+                        or group_id in (select id from auth_group where "name" = 'anonymous')
+                ) guardian_groupobjectpermission
+                left join base_resourcebase on base_resourcebase.id::text = guardian_groupobjectpermission.object_pk
+                left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_groupobjectpermission.object_pk
+                left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_groupobjectpermission.object_pk
+                left join auth_permission ON auth_permission.id = guardian_groupobjectpermission.permission_id
+                left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+                
+                where   model in ('resourcebase', :unitType)
         EOD;
-        $rows = $this->getDbConnection()->select($sql, [$actorId, $actorId, $unitType]);
+        $rows = $this->getDbConnection()->select($sql, [$actorId, $unitType]);
         $result = [];
         $pk = $unitType . "_id";
         $typenameCol = $unitType . "_typename";
@@ -107,18 +134,43 @@ class PermRepositry {
 
     // resourceBasePtrId: mapId in geoportal_data.maps_map.
     public function getCurrentPermsOnMap($resourceBasePtrId) {
+        // $sql = <<<EOD
+        //     select base_resourcebase.owner_id, maps_map.resourcebase_ptr_id as layer_id, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+        //     from guardian_userobjectpermission
+        //     left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
+        //     left join base_resourcebase on base_resourcebase.id = maps_map.resourcebase_ptr_id
+        //     left join guardian_groupobjectpermission 
+        //         ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
+        //     left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
+        //     left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
+        //     left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+            
+        //     where base_resourcebase.id = :resourceBasePtrId and (owner_id = :actorId or user_id = :actorId or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = :actorId) and model in ('resourcebase', 'map')
+        // EOD;
         $sql = <<<EOD
             select base_resourcebase.owner_id, maps_map.resourcebase_ptr_id as layer_id, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
             from guardian_userobjectpermission
             left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
             left join base_resourcebase on base_resourcebase.id = maps_map.resourcebase_ptr_id
-            left join guardian_groupobjectpermission 
-                ON (guardian_groupobjectpermission.permission_id = guardian_userobjectpermission.permission_id and guardian_groupobjectpermission.object_pk = guardian_userobjectpermission.object_pk)
-            left join auth_group ON auth_group.id = guardian_groupobjectpermission.group_id and auth_group."name" = 'anonymous'
             left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
             left join django_content_type ON django_content_type.id = auth_permission.content_type_id
+            where base_resourcebase.id = :resourceBasePtrId 
+                    and (owner_id = :actorId or user_id = :actorId or user_id = -1 or 1000 = :actorId) 
+                    and model in ('resourcebase', 'map')
+            union
+            select base_resourcebase.owner_id, maps_map.resourcebase_ptr_id as layer_id, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
+            from (
+                    select * from guardian_groupobjectpermission 
+                    where group_id in (select group_id from people_profile_groups where profile_id = :actorId)
+                        or group_id in (select id from auth_group where "name" = 'anonymous')
+                ) guardian_groupobjectpermission
+            left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_groupobjectpermission.object_pk
+            left join base_resourcebase on base_resourcebase.id = maps_map.resourcebase_ptr_id
+            left join auth_permission ON auth_permission.id = guardian_groupobjectpermission.permission_id
+            left join django_content_type ON django_content_type.id = auth_permission.content_type_id
             
-            where base_resourcebase.id = :resourceBasePtrId and (owner_id = :actorId or user_id = :actorId or user_id = -1 or auth_group."name" = 'anonymous' or 1000 = :actorId) and model in ('resourcebase', 'map')
+            where base_resourcebase.id = :resourceBasePtrId
+            and model in ('resourcebase', 'map')
         EOD;
         $user = GeoNode::user();
         $actorId = isset($user) ? $user->provider_id : -1;
