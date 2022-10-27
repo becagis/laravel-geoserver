@@ -80,14 +80,16 @@ class PermRepositry {
         // EOD;
         $sql = <<<EOD
                 select owner_id, layers_layer.resourcebase_ptr_id as layer_id,layers_layer.typename as layer_typename, codename, model, maps_map.resourcebase_ptr_id as map_id, maps_map.title_en  as map_typename
-                from guardian_userobjectpermission
+                from (
+                    select * from guardian_userobjectpermission where (user_id = :actorId or user_id = -1  or 1000 = :actorId)
+                ) guardian_userobjectpermission
                 left join base_resourcebase on base_resourcebase.id::text = guardian_userobjectpermission.object_pk
                 left join layers_layer on layers_layer.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
                 left join maps_map on maps_map.resourcebase_ptr_id::text = guardian_userobjectpermission.object_pk
                 left join auth_permission ON auth_permission.id = guardian_userobjectpermission.permission_id
                 left join django_content_type ON django_content_type.id = auth_permission.content_type_id
                 
-                where (user_id = :actorId or user_id = -1  or 1000 = :actorId) and model in ('resourcebase', :unitType)
+                where model in ('resourcebase', :unitType)
                 
                 union
                 

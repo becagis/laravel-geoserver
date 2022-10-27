@@ -14,7 +14,8 @@ use TungTT\LaravelGeoNode\Facades\GeoNode;
 class WfsRepository {
     use 
     HandleHttpRequestTrait,
-    XmlConvertTrait;
+    XmlConvertTrait,
+    GeonodeDbTrait;
 
     protected static $ins;
     protected $cacheMapFeatureTypeToTableName;
@@ -40,6 +41,7 @@ class WfsRepository {
     }
 
     public function verifyMissingFeatureTable($listMissingFeatureTable) {
+        //return $listMissingFeatureTable;
         $result = [];
         $cachedFeatureTables = GeonodeTypeNameTableRepository::instance()->getMapFeatureTypeTable();
         foreach ($listMissingFeatureTable as $feature) {
@@ -62,7 +64,6 @@ class WfsRepository {
                         $result[$feature] = $nativeName;
                     }
                 } catch (Exception $ex) {
-                    
                 }
             }
         } 
@@ -70,6 +71,34 @@ class WfsRepository {
     }
 
     public function getMapFeatureTypeToTableName() {
+        if (isset($this->cacheMapFeatureTypeToTableName)) {
+            return $this->cacheMapFeatureTypeToTableName;
+        }
+        try {
+            $rows = $this->getDbConnection()->select("select * from layers_layer where storeType = 'dataStore'");
+            $mapTableName = [];
+            $types = [];
+            foreach($rows as $row) {
+                $type = $row->typename;
+                $split = explode(':', $type);
+                if (sizeof($split) == 2) {
+                    $type = $split[1];
+                    $substrcheck = strtolower(substr($type, strlen($type) - 4, 4));
+                    if ($substrcheck == 'type') {
+                        $type = substr($type, 0, strlen($type) - 4);
+                    }
+                    array_push($types, $type);
+                }
+            }
+            $mapTableName = $this->verifyMissingFeatureTable($types);
+            $this->cacheMapFeatureTypeToTableName = $mapTableName;         
+            return $mapTableName;
+        } catch (Exception $ex) {
+            return [];
+        }
+    }
+
+    public function __getMapFeatureTypeToTableName() {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
         }
