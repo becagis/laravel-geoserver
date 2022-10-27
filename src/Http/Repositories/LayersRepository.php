@@ -83,7 +83,7 @@ class LayersRepository {
                             st_envelope(
                                 st_extent($geomCol)
                             )) as geojson
-                from $tablename
+                from "$tablename"
             EOD;
             $rows = $this->getDbShpConnection()->select($sql);
             $geojson = $rows[0]->geojson;

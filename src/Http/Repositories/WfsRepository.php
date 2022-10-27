@@ -189,7 +189,7 @@ class WfsRepository {
                 if (sizeof($split) == 2) {
                     $name = $split[1];
                 }
-                $lower = strtolower($name);
+                $lower = $name;
                 if (isset($mapFeatureTypes[$lower])) {
                     array_push($tables, $mapFeatureTypes[$lower]);
                 }
