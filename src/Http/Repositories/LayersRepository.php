@@ -86,9 +86,38 @@ class LayersRepository {
                 from $tablename
             EOD;
             $rows = $this->getDbShpConnection()->select($sql);
-            return json_decode($rows[0]->geojson);
+            $geojson = $rows[0]->geojson;
+
+            $this->getDbPSQL()->delete("delete from geonode_layer_extent where typename = :typeName", [$typeName]);
+            $this->getDbPSQL()->insert("insert into geonode_layer_extent(typename, the_geom) values (:typeName, st_geomfromgeojson(:geojson))", [$typeName, $geojson]);
+
+            return json_decode($geojson);
         } catch (Exception $ex) {
             return null;
         }    
+    }
+
+    public function updateLayersExtent($typeNames) {
+        try {
+            $listTypeNames = explode(',', $typeNames);
+            foreach ($listTypeNames as $typeName) {
+                $this->getLayerExtentGeoJson($typeName);
+            }
+            return $this->getLayersExtentGeoJson($typeNames);
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    public function getLayersExtentGeoJson($typeNames) {
+        try {
+            $sql = <<<EOD
+                select st_asgeojson(st_envelope(st_extent(the_geom))) as geojson from geonode_layer_extent where :typeNames ilike ('%' || typename || ',%')
+            EOD;
+            $rows = $this->getDbPSQL()->select($sql, [$typeNames.',']);
+            return json_decode($rows[0]->geojson);
+        } catch (Exception $ex) {
+            return null;
+        }
     }
 }

@@ -21,6 +21,7 @@ class LaravelGeoserverServiceProvider extends PackageServiceProvider
             ->name('laravel-geoserver')
             ->hasMigrations(['create_objects_recovery_table'])
             ->hasMigrations(['create_cache_geonode_typename_table'])
+            ->hasMigrations(['create_cache_geonode_layer_extent'])
             ->runsMigrations()
             ->hasConfigFile()
             ->hasViews()
