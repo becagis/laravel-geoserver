@@ -86,7 +86,7 @@ class LayersRepository {
                 from $tablename
             EOD;
             $rows = $this->getDbShpConnection()->select($sql);
-            return $rows[0]->geojson;
+            return json_decode($rows[0]->geojson);
         } catch (Exception $ex) {
             return null;
         }    
