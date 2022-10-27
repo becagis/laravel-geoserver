@@ -316,6 +316,7 @@ class GeoRestController extends BaseController {
         //$typeName = strtolower($typeName);
         return match ($getter) {
             'attribute_set' => $this->gettersAttributeSet($typeName),
+            'extent' => $this->gettersExtent($typeName),
             'trash' => $this->gettersTrash($typeName),
             default => $this->returnBadRequest()
         };
@@ -330,6 +331,12 @@ class GeoRestController extends BaseController {
                 default => $this->returnBadRequest()
             };
         });
+    }
+
+    public function gettersExtent($typeName) {
+        return [
+            'geojson' => LayersRepository::instance()->getLayerExtentGeoJson($typeName)
+        ];
     }
 
     public function gettersAttributeSet($typeName) {

@@ -55,4 +55,40 @@ class LayersRepository {
         }
         return implode(',', $resultArr);;
     }
+
+    public function getGeomColsOfTable($tablename) {
+        try {
+            $sql = <<<EOD
+            select column_name 
+            from information_schema.columns 
+            where udt_name = 'geometry' and table_name = :tablename limit 1
+            EOD;
+
+            $rows = $this->getDbShpConnection()->select($sql, [$tablename]);
+            return $rows[0]->column_name;
+        } catch (Exception $ex) {
+            return 'the_geom';
+        }
+    }
+
+    public function getLayerExtentGeoJson($typeName) {
+        try {
+            $tables = WfsRepository::instance()->getTableNamesByFeatureTypes([$typeName]);
+            $tablename = $tables[0];
+
+            $geomCol = $this->getGeomColsOfTable($tablename);
+
+            $sql = <<<EOD
+                select st_asgeojson(
+                            st_envelope(
+                                st_extent($geomCol)
+                            )) as geojson
+                from $tablename
+            EOD;
+            $rows = $this->getDbShpConnection()->select($sql);
+            return $rows[0]->geojson;
+        } catch (Exception $ex) {
+            return null;
+        }    
+    }
 }

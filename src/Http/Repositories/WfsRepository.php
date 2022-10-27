@@ -75,7 +75,7 @@ class WfsRepository {
             return $this->cacheMapFeatureTypeToTableName;
         }
         try {
-            $rows = $this->getDbConnection()->select("select * from layers_layer where storeType = 'dataStore'");
+            $rows = $this->getDbConnection()->select("select * from layers_layer where \"storeType\" = 'dataStore'");
             $mapTableName = [];
             $types = [];
             foreach($rows as $row) {
