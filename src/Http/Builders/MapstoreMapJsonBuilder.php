@@ -22,7 +22,7 @@ class MapstoreMapJsonBuilder {
         $this->geoPortalUrl = config("geonode.url");
         $this->params = [
             "name" => "TestName",
-            "center" => '{"x": 10, "y": 106, "crs": "EPSG:4326"}', // {x: lng, y: lat, crs: "EPSG:4326"}
+            "center" => '{"x": 109.16235217452044, "y": 15.858842694266393, "crs": "EPSG:4326"}', // {x: lng, y: lat, crs: "EPSG:4326"}
             "projection" => "EPSG:4326",
             "layers" => "[]"
         ];
@@ -44,6 +44,7 @@ class MapstoreMapJsonBuilder {
 
     protected function getJSONTemplate() {
         extract($this->params, EXTR_PREFIX_ALL, "params");
+        $params_id_string = isset($params_id) ? ",\"id\": $params_id" : "";
         return <<<EOD
         {
             "name": "{$params_name}",
@@ -59,7 +60,7 @@ class MapstoreMapJsonBuilder {
                     ],
                     "projection": "{$params_projection}",
                     "units": "m",
-                    "zoom": 0,
+                    "zoom": 5,
                     "mapOptions": {
         
                     },
@@ -134,6 +135,7 @@ class MapstoreMapJsonBuilder {
                     "label": "Abstract"
                 }
             ]
+            $params_id_string
         }
         
         EOD;
