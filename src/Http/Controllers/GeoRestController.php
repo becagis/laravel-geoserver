@@ -372,7 +372,6 @@ class GeoRestController extends BaseController {
     }
 
     public function gettersTrashRestore() {
-        GeoServerUrlBuilder::build()->prepareTransactions();
         $data = request()->all();
         $id = isset($data['id']) ? $data['id'] : null;
         if ($id != null) {

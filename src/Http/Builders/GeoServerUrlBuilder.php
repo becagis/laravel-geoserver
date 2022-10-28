@@ -24,11 +24,11 @@ class GeoServerUrlBuilder {
     }
 
     protected function invalidateCache() {
-       Http::get($this->createUrlGeoFencInvalidateCache());
+       //Http::get($this->createUrlGeoFencInvalidateCache());
     }
 
     public function prepareTransactions() {
-        $this->invalidateCache();
+        //$this->invalidateCache();
     }
 
     protected $params = [];
