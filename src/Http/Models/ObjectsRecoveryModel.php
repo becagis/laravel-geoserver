@@ -4,6 +4,7 @@ namespace BecaGIS\LaravelGeoserver\Http\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class ObjectsRecoveryModel extends Model {
+    public static $STATUS_NOINTRASH = -1;
     public static $STATUS_INTRASH = 0;
     public static $STATUS_RESTORED = 1;
 

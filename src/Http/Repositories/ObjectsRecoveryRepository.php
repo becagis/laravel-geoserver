@@ -26,11 +26,22 @@ class ObjectsRecoveryRepository {
                     'created_by' => $username,
                     'data' => json_encode($obj_attributes),
                     'geom' => json_encode($this->getGeometry($obj_attributes)),
-                    'status' => ObjectsRecoveryModel::$STATUS_INTRASH
+                    'status' => ObjectsRecoveryModel::$STATUS_NOINTRASH
                 ];
-                ObjectsRecoveryModel::create($data);
+                return ObjectsRecoveryModel::create($data);
             } catch (Exception $ex) {
+                
             }
+        }
+        return null;
+    }
+
+    public function setInTrash($trash) {
+        try {
+            $trash->status = ObjectsRecoveryModel::$STATUS_INTRASH;
+            $trash->save();
+        } catch (Exception $ex) {
+
         }
     }
 
@@ -51,8 +62,9 @@ class ObjectsRecoveryRepository {
     }
 
     public function list($typeName) {
-        $sql = "select * from objects_recovery where object_type = ? and restored_at is null order by created_at desc";
-        $rows = $this->getDbPSQL()->select($sql, [$typeName]);
+        $sql = "select * from objects_recovery where object_type = :typeName and restored_at is null and status = :status  order by created_at desc";
+        $status = ObjectsRecoveryModel::$STATUS_INTRASH;
+        $rows = $this->getDbPSQL()->select($sql, [$typeName, $status]);
         return $rows;
     }
 
