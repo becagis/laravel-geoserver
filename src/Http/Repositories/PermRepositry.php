@@ -1,13 +1,14 @@
 <?php 
 namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 
+use BecaGIS\LaravelGeoserver\Http\Traits\ActionVerifyGeonodeTokenTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use DateTime;
 use Exception;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
 class PermRepositry {
-    use GeonodeDbTrait;
+    use GeonodeDbTrait, ActionVerifyGeonodeTokenTrait;
     const ActorTypeGroup = 'group';
     const ActorTypeUser = 'user';
 
@@ -247,8 +248,7 @@ class PermRepositry {
             where base_resourcebase.id = :resourceBasePtrId
             and model in ('resourcebase', 'map')
         EOD;
-        $user = GeoNode::user();
-        $actorId = isset($user) ? $user->provider_id : -1;
+        $actorId = $this->getUserProviderId();
         $isAdmin = $this->isAdmin($actorId);
         $rows = $this->getDbConnection()->select($sql, [$resourceBasePtrId, $actorId]);
         $result = [];
