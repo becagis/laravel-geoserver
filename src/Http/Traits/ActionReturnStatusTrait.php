@@ -9,7 +9,7 @@ trait ActionReturnStatusTrait {
     }    
 
     protected function returnBadRequest($message = "Thao tác bị từ chối") {
-        return response()->json(["message" => $message, "status" => false], Response::HTTP_FOUND);
+        return response()->json(["message" => $message, "status" => false], Response::HTTP_FORBIDDEN);
     }
 
     protected function returnNoContent() {
