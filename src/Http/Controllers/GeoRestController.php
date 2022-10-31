@@ -377,8 +377,8 @@ class GeoRestController extends BaseController {
         $data = request()->all();
         $id = isset($data['id']) ? $data['id'] : null;
         if ($id != null) {
-            ObjectsRecoveryRepositoryFacade::restoreRecoveryToGeoDbFeature($id);
-            return $this->returnOK();
+            return ObjectsRecoveryRepositoryFacade::restoreRecoveryToGeoDbFeature($id);
+            //return $this->returnOK();
         } else {
             return $this->returnBadRequest();
         }

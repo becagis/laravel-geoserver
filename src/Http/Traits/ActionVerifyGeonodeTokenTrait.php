@@ -1,6 +1,7 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Traits;
 
+use Exception;
 use stdClass;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
@@ -49,10 +50,14 @@ trait ActionVerifyGeonodeTokenTrait {
             $accessToken = $this->getAccessToken();
             if (isset($accessToken)) {
                 $tokenInfo = GeoNode::tokenInfo($accessToken);
-                $user = new stdClass();
-                $user->provider_id = $tokenInfo['user_id'];
-                $user->username = $tokenInfo['username'];
-                return $user;
+                try {
+                    $user = new stdClass();
+                    $user->provider_id = $tokenInfo['user_id'];
+                    $user->username = $tokenInfo['username'];
+                    return $user;
+                } catch (Exception $ex) {
+                    
+                }
             }
         }
         return null;
