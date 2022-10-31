@@ -89,14 +89,32 @@ class GeoFeatureRepository
         });
     }
 
+    public function checkPerm($permName, $typeName) {
+        $providerId = $this->getUserProviderId();
+        $layers = PermRepositry::instance()->getActorPermsOnLayerUnit($providerId, 'user', $typeName);
+        $permsArr = array_values($layers);
+        $perms = [];
+        foreach ($permsArr as $perm) {
+            $perms = array_merge($perms, $perm['perms']);
+        }
+        return in_array($permName, $perms);
+    }
+
+
     public function getAttributeSet($typeName) {
-        $sql = <<<EOD
-            SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
-            FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
-            WHERE typename = ? order by display_order
-        EOD;
-        $rows = $this->getDbConnection()->select($sql, [$typeName]);
-        return $rows;
+        try {
+            if ($this->checkPerm('view_resourcebase', $typeName)) {
+                $sql = <<<EOD
+                    SELECT attribute, description, attribute_label, attribute_type, visible, display_order, featureinfo_type
+                    FROM public.layers_attribute left join layers_layer on layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
+                    WHERE typename = ? order by display_order
+                EOD;
+                $rows = $this->getDbConnection()->select($sql, [$typeName]);
+                return $rows;
+            }
+        } catch (Exception $ex) {
+            return [];
+        }
     }
 
     public function getAttributeSetMap($typeName) {
