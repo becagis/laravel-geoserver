@@ -5,7 +5,7 @@ use Exception;
 use stdClass;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
-trait ActionVerifyGeonodeTokenTrait { 
+trait ActionVerifyGeonodeTokenTrait {
     use ActionReturnStatusTrait;
 
     protected function actionVerifyGeonodeToken($successCallback) {
@@ -35,12 +35,12 @@ trait ActionVerifyGeonodeTokenTrait {
     protected function getAccessToken() {
         $accessToken = $this->getParamAccessTokenFromRequest();
         if (isset($accessToken)) {
-            return GeoNode::getAccessToken($accessToken); 
+            return GeoNode::getAccessToken($accessToken);
         } else {
             return GeoNode::getAccessToken();
         }
         return null;
-    } 
+    }
 
     protected function getUser() {
         $user = GeoNode::user();
@@ -56,7 +56,6 @@ trait ActionVerifyGeonodeTokenTrait {
                     $user->username = $tokenInfo['username'];
                     return $user;
                 } catch (Exception $ex) {
-                    
                 }
             }
         }
@@ -70,4 +69,4 @@ trait ActionVerifyGeonodeTokenTrait {
         }
         return -1;
     }
-}   
+}

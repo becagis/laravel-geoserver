@@ -101,8 +101,8 @@ class GeoRestController extends BaseController {
             $page = $request->get('page', 0);
             $layers = $request->get('layers', null);
 
-            $user = FacadesGeoNode::user();
-            $userId = $user->provider_id;
+            //$user = FacadesGeoNode::user();
+            $userId = $this->getUserProviderId();
 
             $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
             $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($listLayersCanAccess);
@@ -156,11 +156,12 @@ class GeoRestController extends BaseController {
             $validated = $validator->validated();
         }
 
-        $user = FacadesGeoNode::user();
-        $userId = -1;
-        if ($user != null) {
-            $userId = $user->provider_id;
-        }
+//        $user = FacadesGeoNode::user();
+//        $userId = -1;
+//        if ($user != null) {
+//            $userId = $user->provider_id;
+//        }
+        $userId = $this->getUserProviderId();
 
         $layers = $request->get('layers', null);
         $listLayersCanAccess = PermRepositry::instance()->filterListLayerTypeNameCanAccess($userId, PermRepositry::ActorTypeUser, ['view_resourcebase'], $layers);
@@ -217,7 +218,7 @@ class GeoRestController extends BaseController {
                 $cql_filter_encoded = urlencode($cql_filter);
                 $url .= "&cql_filter={$cql_filter_encoded}";
             }
-            
+
             $response =  Http::get($url);
             return $this->handleHttpRequest($response,
                 // success callback
@@ -357,7 +358,7 @@ class GeoRestController extends BaseController {
 
     public function gettersAttributeSet($typeName) {
         $rows = GeoFeatureRepositoryFacade::getAttributeSet($typeName);
-        return [    
+        return [
             'meta' => [
                 'primary_key' => ResourceBaseRepository::instance()->getPkColumnNameOfTypeName($typeName)
             ],
