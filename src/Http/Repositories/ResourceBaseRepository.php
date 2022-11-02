@@ -29,12 +29,19 @@ class ResourceBaseRepository {
     }
     // $params => [name, center: [x,y,crs], projection: 'EPSG:4326', layers: '[]', 'data' => MapData]
     public function creatMapResource($params) {
-        $url = config('geonode.url');
         $accessToken = $this->getAccessToken();
+        $url = config('geonode.url');
         $url = "$url/mapstore/rest/resources/?full=true&access_token=$accessToken";
+        
         $layers = $this->getMapStoreLayersStrFromMapData($params["data"]);
-        $json = MapstoreMapJsonBuilder::build()->setParams(["name" => $params["name"], "layers" => $layers])->json();
-        $http = Http::withToken($accessToken)->withBody($json, 'application/json')->post($url);
+        $json = MapstoreMapJsonBuilder::build()
+                                    ->setParams([
+                                        "name" => $params["name"], 
+                                        "layers" => $layers
+                                    ])->json();
+        $http = Http::withToken($accessToken)
+                    ->withBody($json, 'application/json')
+                    ->post($url);
 
         $successCall = function($res) {
             return $res;
@@ -81,7 +88,7 @@ class ResourceBaseRepository {
     //id-id, name-name, title-title, type-type, url-url, format, visibility:true,format: image/png, params
     public function getMapStoreLayer($mapsLayer) {
         $id = $mapsLayer["id"];
-        $name = $mapsLayer["name"];
+        $name = $mapsLayer["owsLayers"];
         $title = $mapsLayer["title"];
         $type = $mapsLayer["type"];
         $url = $mapsLayer["url"];
