@@ -3,11 +3,12 @@ namespace BecaGIS\LaravelGeoserver\Http\Resources;
 
 use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\GeoFeatureRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Repositories\GeoFeatureRepository;
+use BecaGIS\LaravelGeoserver\Http\Traits\ConfigTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\WfsGeomTrait;
 use Exception;
 
 class WfsTransaction {
-    use WfsGeomTrait;
+    use WfsGeomTrait, ConfigTrait;
 
     protected $deletes, $updates, $creates, $updateGeoms, $createGeoms;
     protected $typeName, $fid, $attributeSetMap;
@@ -28,9 +29,18 @@ class WfsTransaction {
         if (isset($this->attributeSetMap[$attributeName])) {
             return $this->attributeSetMap[$attributeName] == "xsd:int" ||
             $this->attributeSetMap[$attributeName] == "xsd:float" ||
-            $this->attributeSetMap[$attributeName] == "xsd:double";
+            $this->attributeSetMap[$attributeName] == "xsd:double" ||
+            $this->attributeSetMap[$attributeName] == "xsd:long";
         }
         return true;
+    }
+
+    public function checkAttrIsDate($attributeName) {
+        if (isset($this->attributeSetMap[$attributeName])) {
+            return 
+                $this->attributeSetMap[$attributeName] == "xsd:dateTime" ||
+                $this->attributeSetMap[$attributeName] == "xsd:date";
+        }
     }
 
     public function __construct() {
@@ -101,7 +111,10 @@ class WfsTransaction {
 
     // exp: addCreateProp(name: 'matdo', value: '')
     public function addCreateProp($name, $value) {
-        if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value == "")) {
+        if ($this->checkAttrIsInt($name) && (!is_numeric($value) || $value == "")) {
+            return $this;
+        }
+        if ($this->checkAttrIsDate($name) && ($value == "" || $value == null)) {
             return $this;
         }
         if (in_array($name, $this->geomProps)) {
@@ -130,7 +143,10 @@ class WfsTransaction {
     // exp: addUpdateProp(name: 'matdo', value: '')
     public function addUpdateProp($name, $value) {
         if ($this->checkAttrIsInt($name) & (!is_numeric($value) || $value == "")) {
-            $value = "-99999";
+            $value = $this->getConfig($this->configDefaultValueInt);
+        }
+        if ($this->checkAttrIsDate($name) && ($value == "" || $value == null)) {
+            $value = $this->getConfig($this->configDefaultValueDate);
         }
 
         if (in_array($name, $this->geomProps)) {

@@ -4,6 +4,7 @@ namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
 use BecaGIS\LaravelGeoserver\Http\Builders\MapstoreMapJsonBuilder;
 use BecaGIS\LaravelGeoserver\Http\Models\GeonodeTypeNameTableModel;
+use BecaGIS\LaravelGeoserver\Http\Traits\ActionVerifyGeonodeTokenTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
@@ -15,6 +16,7 @@ class WfsRepository {
     use 
     HandleHttpRequestTrait,
     XmlConvertTrait,
+    ActionVerifyGeonodeTokenTrait,
     GeonodeDbTrait;
 
     protected static $ins;
@@ -49,7 +51,7 @@ class WfsRepository {
                 $result[$feature] = $cachedFeatureTables[$feature];
             } else {
                 try {
-                    $accessToken = GeoNode::getAccessToken();
+                    $accessToken = $this->getAccessToken();
                     $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->urlRestFeatureType($feature);
                     $http = Http::get($url);
                     $nativeName = $this->handleHttpRequest($http, 
@@ -102,7 +104,7 @@ class WfsRepository {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
         }
-        $accessToken = GeoNode::getAccessToken();
+        $accessToken = $this->getAccessToken();
         $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)
                         ->removeParamKey("outputFormat")
                         ->addParams([
@@ -143,7 +145,7 @@ class WfsRepository {
         if (isset($this->cacheMapFeatureTypeToTableName)) {
             return $this->cacheMapFeatureTypeToTableName;
         }
-        $accessToken = GeoNode::getAccessToken();
+        $accessToken = $this->getAccessToken();
         $url = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->addParams([
             'request' => 'GetCapabilities'
         ])->url();
