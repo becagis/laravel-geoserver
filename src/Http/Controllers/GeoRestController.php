@@ -96,7 +96,7 @@ class GeoRestController extends BaseController {
     }
 
     public function geoStatsSearch(Request $request) {
-        return $this->actionVerifyGeonodeToken(function($accessToken) use($request){
+        return $this->actionVerifyGeonodeTokenAllowNone(function($accessToken) use($request){
             $query = $request->get('query', '');
             $page = $request->get('page', 0);
             $layers = $request->get('layers', null);
