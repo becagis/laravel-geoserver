@@ -64,6 +64,10 @@ class GeoRestController extends BaseController {
         $featureTypes = explode(',', $layers);
         $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($featureTypes);
         $layers = implode(',', array_keys($tables));
+        if (!isset($layers) || $layers == "") {
+            return ['data' => []];
+        }
+
         $baseUrl = "{$this->geoStatsUrl}/pgstats/stats/count-features?tablePrefix=$tablePrefix";
         $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
 

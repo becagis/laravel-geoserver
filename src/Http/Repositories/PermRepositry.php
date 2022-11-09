@@ -26,8 +26,9 @@ class PermRepositry {
     public function filterListLayerTypeNameCanAccess($actorId, $actorType, $perms, $listTypeName) {
         $listLayers = $this->getLayersActorCanAccess($actorId, $actorType, $perms);
         $permLayers = array_column($listLayers, 'typename');
+;
         if (!isset($listTypeName) || empty($listTypeName)) {
-            return $permLayers;
+            return [];
         } else {
             $res = [];
             $listTypeName = is_string($listTypeName) ? explode(',', $listTypeName) : $listTypeName;
@@ -36,7 +37,7 @@ class PermRepositry {
                 if (in_array($typename, $permLayers) || in_array("geonode:$lower", $permLayers)) {
                     array_push($res, $typename);
                 }
-            } 
+            }
             return $res;
         }
     }
