@@ -26,7 +26,7 @@ class PermRepositry {
     public function filterListLayerTypeNameCanAccess($actorId, $actorType, $perms, $listTypeName) {
         $listLayers = $this->getLayersActorCanAccess($actorId, $actorType, $perms);
         $permLayers = array_column($listLayers, 'typename');
-;
+
         if (!isset($listTypeName) || empty($listTypeName)) {
             return [];
         } else {
@@ -40,6 +40,12 @@ class PermRepositry {
             }
             return $res;
         }
+    }
+
+    public function getListLayersTypeNameCanAccess($actorId, $actorType, $perms) {
+        $listLayers = $this->getLayersActorCanAccess($actorId, $actorType, $perms);
+        $permLayers = array_column($listLayers, 'typename');
+        return isset($permLayers) ? array_unique($permLayers) : [];
     }
 
     public function isAdmin($actorId) {

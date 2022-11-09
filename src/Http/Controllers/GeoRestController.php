@@ -46,15 +46,39 @@ class GeoRestController extends BaseController {
     }
 
     public function geoStatsLabels(Request $request) {
-        $query = $request->get('query', '');
-        $baseUrl = "{$this->geoStatsUrl}/pgstats/search/labels";
+        try {
+            $layers = PermRepositry::instance()->getListLayersTypeNameCanAccess($this->getUserProviderId(), 'user', ['view_resourcebase']);
+            $sqlLayers = sizeof($layers) > 0 ? "'" . implode("','", $layers) . "'" : "''";
+            $sql = <<<EOD
+            select 
+                layers_layer.title_en as layertitle, 
+                layers_layer.name as layername, 
+                display_order as displayorder,
+                layers_attribute.attribute as attributename, 
+                attribute_label as attributelabel
+            from layers_attribute
+            left join layers_layer ON layers_layer.resourcebase_ptr_id = layers_attribute.layer_id
+            where layers_layer.typename in ($sqlLayers)
+            order by layername, display_order
+            EOD;
+            $rows = $this->getDbConnection()->select($sql);
+            $result = [];
+            foreach ($rows as $row) {
+                $layername = $row->layername;
+                if (!isset($result[$layername])) {
+                    $result[$layername] = [
+                        "name" => $layername,
+                        "title" => $row->layertitle,
+                        "attributes" => []
+                    ];
+                };
+                $result[$layername]["attributes"][$row->attributename] = $row;
+            }
 
-        $http = Http::get($baseUrl);
-        return $this->handleHttpRequest($http, function($data) {
-            return $data;
-        }, function () {
-            return $this->returnBadRequest();
-        });
+            return ["data" => $result];
+        } catch (Exception $ex) {
+            return ["data" => []];
+        }
     }
 
     public function geoStatsCountFeatures(Request $request) {
