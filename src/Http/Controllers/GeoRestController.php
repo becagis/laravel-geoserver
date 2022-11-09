@@ -108,9 +108,11 @@ class GeoRestController extends BaseController {
             $tables = WfsRepository::instance()->getTableNamesMapByFeatureTypes($listLayersCanAccess);
             $layers = implode(',', array_keys($tables));
 
+            if (!isset($layers) || $layers == "") {
+                return ['data' => []];
+            }
             $baseUrl = "{$this->geoStatsUrl}/pgstats/search/features?query=$query&page=$page";
             $baseUrl = isset($layers) ? "$baseUrl&layers=$layers" : $baseUrl;
-
             $http = Http::get($baseUrl);
             return $this->handleHttpRequest($http, function($data) use ($tables) {
                 $mapTables = $tables;
