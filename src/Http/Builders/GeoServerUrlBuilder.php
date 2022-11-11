@@ -1,10 +1,12 @@
 <?php
 namespace BecaGIS\LaravelGeoserver\Http\Builders;
 
+use BecaGIS\LaravelGeoserver\Http\Traits\ConfigTrait;
 use Illuminate\Support\Facades\Http;
 use TungTT\LaravelGeoNode\Facades\GeoNode;
 
 class GeoServerUrlBuilder {
+    use ConfigTrait;
     public static function build() {
         return new GeoServerUrlBuilder([]);
     }
@@ -15,7 +17,8 @@ class GeoServerUrlBuilder {
 
     public function urlRestFeatureType($featureType) {
         $urlParams = $this->urlParams() . $this->paramsString;
-        return "{$this->geoserverUrl}/rest/workspaces/geonode/datastores/geoportal_data/featuretypes/{$featureType}.json?{$urlParams}";
+        $dataStore = $this->getConfig($this->configGeoServerDataStore);
+        return "{$this->geoserverUrl}/rest/workspaces/geonode/datastores/$dataStore/featuretypes/{$featureType}.json?{$urlParams}";
     }
 
     public function createUrlGeoFencInvalidateCache($uuid) {
