@@ -23,4 +23,8 @@ return new class extends Migration
             $table->timestamp('restored_at')->nullable();
         });
     }
+
+    public function down() {
+        Schema::dropIfExists('objects_recovery');
+    }
 };
