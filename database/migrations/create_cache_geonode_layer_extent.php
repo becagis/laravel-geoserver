@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('geonode_layer_extent', function (Blueprint $table) {
             $table->id();
             $table->string('typename')->nullable();
-            $table->addcolumn('geometry', 'the_geom');
+            $table->addColumn('geometry', 'the_geom');
             $table->timestamp('created_at')->nullable();
         });
     }
