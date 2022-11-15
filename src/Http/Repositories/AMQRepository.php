@@ -2,6 +2,8 @@
 
 namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 
+use BecaGIS\LaravelGeoserver\Jobs\AMQBecaGISJob;
+use Exception;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
@@ -20,7 +22,7 @@ class AMQRepository {
     protected $exchange;
 
     function __construct() {
-        $this->createConnection();
+        //$this->createConnection();
     }
 
     function __destruct() {
@@ -33,6 +35,14 @@ class AMQRepository {
         }
 
         return $instance;
+    }
+
+    public function asyncSend($channel, $action, $data, $meta, $typeName) {
+        try {
+            AMQBecaGISJob::dispatch($channel, $action, $data, $meta, $typeName);
+        } catch(Exception $ex) {
+            //dd($ex);
+        }
     }
 
         

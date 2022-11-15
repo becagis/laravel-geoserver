@@ -14,7 +14,6 @@ use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\RemovePrimaryKeyFromDataUpdateTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
-use BecaGIS\LaravelGeoserver\Jobs\AMQBecaGISJob;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use TungTT\LaravelGeoNode\Facades\GeoNode as FacadesGeoNode;
@@ -59,7 +58,7 @@ class GeoFeatureRepository
 
     function onStoreSuccess($typeName, $data) {
         try {
-            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionCreate, $data, [], $typeName);
+            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionCreate, $data, [], $typeName);
         } catch (Exception $ex) {
         }
     }
@@ -102,7 +101,7 @@ class GeoFeatureRepository
 
     function onUpdateSuccess($typeName, $data) {
         try {
-            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionUpdate, $data, [], $typeName);
+            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionUpdate, $data, [], $typeName);
         } catch (Exception $ex) {
             //dd($ex);
         }
@@ -140,7 +139,7 @@ class GeoFeatureRepository
 
     function onDeleteSuccess($typeName, $data) {
         try {
-            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionDelete, $data, [], $typeName);
+            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionDelete, $data, [], $typeName);
         } catch (Exception $ex) {
         }
     }
