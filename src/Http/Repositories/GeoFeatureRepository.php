@@ -3,6 +3,7 @@
 namespace BecaGIS\LaravelGeoserver\Http\Repositories;
 
 use BecaGIS\LaravelGeoserver\Http\Builders\GeoServerUrlBuilder;
+use BecaGIS\LaravelGeoserver\Http\Repositories\Facades\ObjectsRecoveryRepositoryFacade;
 use BecaGIS\LaravelGeoserver\Http\Resources\WfsTransaction;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionReturnStatusTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\ActionVerifyGeonodeTokenTrait;
@@ -13,6 +14,7 @@ use BecaGIS\LaravelGeoserver\Http\Traits\GeonodeDbTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\HandleHttpRequestTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\RemovePrimaryKeyFromDataUpdateTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
+use BecaGIS\LaravelGeoserver\Jobs\AMQBecaGISJob;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use TungTT\LaravelGeoNode\Facades\GeoNode as FacadesGeoNode;
@@ -55,6 +57,13 @@ class GeoFeatureRepository
         });
     }
 
+    function onStoreSuccess($typeName, $data) {
+        try {
+            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionCreate, $data, [], $typeName);
+        } catch (Exception $ex) {
+        }
+    }
+
     public function store($typeName, $data)
     {
         //$typeName = strtolower($typeName);
@@ -79,9 +88,81 @@ class GeoFeatureRepository
                     $fid = $xmlJson->InsertResults->Feature->FeatureId->attributes->fid;
                     if ($fid != null && sizeof(explode('.', $fid)) > 1) {
                         $res = $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
+                        $this->onStoreSuccess($typeName, $res['data']);
                         return $res;
                     } else {
                         return $this->returnBadRequest();
+                    }
+                } catch (Exception $ex) {
+                    return $this->returnBadRequest();
+                }
+            });
+        });
+    }
+
+    function onUpdateSuccess($typeName, $data) {
+        try {
+            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionUpdate, $data, [], $typeName);
+        } catch (Exception $ex) {
+            //dd($ex);
+        }
+    }
+
+    public function update($typeName, $fid, $data) {
+        return $this->actionVerifyGeonodeToken(function($accessToken) use ($data, $typeName, $fid) {
+            $data = $this->removePrimaryKeyOfTypeName($typeName, $data);
+            if (empty($data)) {
+                return $this->returnBadRequest();
+            }
+            $xml = WfsTransaction::build($typeName, $fid)->addUpdateProps($data)->xml();
+            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
+            $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
+                'body' => $xml
+            ]);
+
+            return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $data, $fid) {
+                try {
+                    $xmlJson = $this->convertWfsXmlToObj($rd->body());
+                    if (isset($xmlJson->Exception)) {
+                        throw new Exception(json_encode($xmlJson->Exception));
+                    }
+                    if ($fid != null) {
+                        $res = $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
+                        $this->onUpdateSuccess($typeName, $res['data']);
+                        return $res;
+                    }
+                } catch (Exception $ex) {
+                    return $this->returnBadRequest();
+                }
+            });
+        });
+    }
+
+    function onDeleteSuccess($typeName, $data) {
+        try {
+            AMQBecaGISJob::dispatch(AMQRepository::ChannelFeature, AMQRepository::ActionDelete, $data, [], $typeName);
+        } catch (Exception $ex) {
+        }
+    }
+
+    public function delete($typeName, $fid) {
+        return $this->actionVerifyGeonodeToken(function($accessToken) use ($typeName, $fid) {
+            $trash = ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
+            $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
+            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
+            $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
+                'body' => $xml
+            ]);
+
+            return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid, $trash) {
+                try {
+                    $xmlJson = $this->convertWfsXmlToObj($rd->body());
+                    if (isset($xmlJson->Exception)) {
+                        throw new Exception(json_encode($xmlJson->Exception));
+                    } else {
+                        ObjectsRecoveryRepositoryFacade::setInTrash($trash);
+                        $this->onDeleteSuccess($typeName, ['fid' => $fid]);
+                        return $this->returnNoContent();
                     }
                 } catch (Exception $ex) {
                     return $this->returnBadRequest();

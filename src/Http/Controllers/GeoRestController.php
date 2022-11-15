@@ -283,32 +283,11 @@ class GeoRestController extends BaseController {
 
     public function update(Request $request, $typeName, $fid) {
         //$typeName = strtolower($typeName);
-        return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $data = $request->post();
-            $data = $this->removePrimaryKeyOfTypeName($typeName, $data);
-            if (empty($data)) {
-                return $this->returnBadRequest();
-            }
-            $xml = WfsTransaction::build($typeName, $fid)->addUpdateProps($data)->xml();
-            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
-            $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
-                'body' => $xml
-            ]);
-
-            return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $data, $fid) {
-                try {
-                    $xmlJson = $this->convertWfsXmlToObj($rd->body());
-                    if (isset($xmlJson->Exception)) {
-                        throw new Exception(json_encode($xmlJson->Exception));
-                    }
-                    if ($fid != null) {
-                        return $this->convertToRestifyCreateSuccessResponse($typeName, $fid, $data);
-                    }
-                } catch (Exception $ex) {
-                    return $this->returnBadRequest();
-                }
-            });
-        });
+        try {
+            return GeoFeatureRepositoryFacade::update($typeName, $fid, $request->post());
+         } catch (Exception $ex) {
+             return $this->returnBadRequest();
+         }
     }
 
     public function store(Request $request, $typeName) {
@@ -321,28 +300,11 @@ class GeoRestController extends BaseController {
 
     public function delete(Request $request, $typeName, $fid) {
         //$typeName = strtolower($typeName);
-        return $this->actionVerifyGeonodeToken(function($accessToken) use ($request, $typeName, $fid) {
-            $trash = ObjectsRecoveryRepositoryFacade::createRecoveryFromGeoDbFeature($typeName, $fid);
-            $xml = WfsTransaction::build($typeName, $fid)->addDelete()->xml();
-            $apiUrl = GeoServerUrlBuilder::buildWithAccessToken($accessToken)->url();
-            $response = Http::contentType('text/plain')->send('POST',$apiUrl, [
-                'body' => $xml
-            ]);
-
-            return $this->handleHttpRequestRaw($response, function($rd) use ($typeName, $fid, $trash) {
-                try {
-                    $xmlJson = $this->convertWfsXmlToObj($rd->body());
-                    if (isset($xmlJson->Exception)) {
-                        throw new Exception(json_encode($xmlJson->Exception));
-                    } else {
-                        ObjectsRecoveryRepositoryFacade::setInTrash($trash);
-                        return $this->returnNoContent();
-                    }
-                } catch (Exception $ex) {
-                    return $this->returnBadRequest();
-                }
-            });
-        });
+        try {
+            return GeoFeatureRepositoryFacade::delete($typeName, $fid);
+         } catch (Exception $ex) {
+             return $this->returnBadRequest();
+         }
     }
 
     public function getters(Request $request, $typeName, $getter) {
