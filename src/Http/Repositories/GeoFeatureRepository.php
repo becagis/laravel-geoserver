@@ -16,6 +16,9 @@ use BecaGIS\LaravelGeoserver\Http\Traits\RemovePrimaryKeyFromDataUpdateTrait;
 use BecaGIS\LaravelGeoserver\Http\Traits\XmlConvertTrait;
 use Exception;
 use Illuminate\Support\Facades\Http;
+use TungTT\LaravelGeoNode\Events\FeatureCreated;
+use TungTT\LaravelGeoNode\Events\FeatureDeleted;
+use TungTT\LaravelGeoNode\Events\FeatureUpdated;
 use TungTT\LaravelGeoNode\Facades\GeoNode as FacadesGeoNode;
 
 class GeoFeatureRepository
@@ -56,13 +59,6 @@ class GeoFeatureRepository
         });
     }
 
-    function onStoreSuccess($typeName, $data) {
-        try {
-            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionCreate, $data, [], $typeName);
-        } catch (Exception $ex) {
-        }
-    }
-
     public function store($typeName, $data)
     {
         //$typeName = strtolower($typeName);
@@ -99,11 +95,31 @@ class GeoFeatureRepository
         });
     }
 
+    function onStoreSuccess($typeName, $data) {
+        FeatureCreated::dispatch($data);
+
+        try {
+            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionCreate, $data, [], $typeName);
+        } catch (Exception $ex) {
+        }
+    }
+
     function onUpdateSuccess($typeName, $data) {
+        FeatureUpdated::dispatch($data);
+
         try {
             AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionUpdate, $data, [], $typeName);
         } catch (Exception $ex) {
             //dd($ex);
+        }
+    }
+
+    function onDeleteSuccess($typeName, $data) {
+        FeatureDeleted::dispatch($data['fid']);
+
+        try {
+            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionDelete, $data, [], $typeName);
+        } catch (Exception $ex) {
         }
     }
 
@@ -135,13 +151,6 @@ class GeoFeatureRepository
                 }
             });
         });
-    }
-
-    function onDeleteSuccess($typeName, $data) {
-        try {
-            AMQRepository::instance()->asyncSend(AMQRepository::ChannelFeature, AMQRepository::ActionDelete, $data, [], $typeName);
-        } catch (Exception $ex) {
-        }
     }
 
     public function delete($typeName, $fid) {
